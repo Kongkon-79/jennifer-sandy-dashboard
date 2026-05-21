@@ -1,22 +1,16 @@
 import React from 'react'
 import { DashboardOverview } from './_components/dashboard-overview'
-import { RevenueActivity } from './_components/revenue-activity'
-import PricingAndPayment from './_components/pricing-and-payment'
-import UserRegistration from './_components/user-registrations'
-// import DashboardHeader from '@/components/ui/dashboard-header'
-import DashboardOverviewHeader from './_components/dashboard-overview-header'
+import DashboardHeader from '@/components/ui/dashboard-header'
+import RecentInquiries from './_components/recent-inquiries'
+import CrmStatusSummary from './_components/crm-status-summary'
 
 const DashboardOverviewPage = () => {
   return (
     <div>
-      {/* <DashboardHeader title="Welcome back, Michael" desc="Ready to compete in your next match?"/> */}
-      <DashboardOverviewHeader/>
+      <DashboardHeader title="Dashboard" desc="Welcome back! Here's what's happening with your app today."/>
       <DashboardOverview/>
-      <RevenueActivity/>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <PricingAndPayment/>
-        <UserRegistration/>
-      </div>
+      <RecentInquiries/>
+      <CrmStatusSummary/>
     </div>
   )
 }
