@@ -6,7 +6,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div>
       <SidebarProvider defaultOpen={true}>
-        <div style={{ "--sidebar-width": "320px" } as React.CSSProperties}>
+        <div style={{ "--sidebar-width": "312px" } as React.CSSProperties}>
           <DashboardSidebar />
         </div>
         <main className="w-full">

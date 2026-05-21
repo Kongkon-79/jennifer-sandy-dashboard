@@ -1,5 +1,5 @@
 "use client";
-import { Calendar, DollarSign, Users } from "lucide-react";
+import { Building2, List, MessageSquare, FileText } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import DashboardOverviewSkeleton from "./dashboard-overview-skeleton";
 import ErrorContainer from "@/components/shared/ErrorContainer/ErrorContainer";
@@ -56,68 +56,68 @@ export function DashboardOverview() {
     </div>;
   } else {
     content = (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-6">
 
-        <div className="md:col-span-1 h-[139px] flex items-center justify-between bg-white shadow-[0px_4px_6px_0px_#0000001A] px-4 rounded-[8px]">
+        <div className="md:col-span-1 h-[128px] flex items-center justify-between bg-[#F8F8F8] border border-[#E2E2E2] shadow-[0px_2px_6px_0px_#00000014] px-4 rounded-[10px]">
           <div>
-            <p className="text-sm font-semibold text-[#424242] leading-[120%]">
-              Total Revenue
+            <p className="text-base md:text-lg leading-[150%] font-medium text-[#8E938F]">
+              Total Apartments
             </p>
-            <p className="text-3xl leading-[120%] text-[#424242] font-bold font-hexco pt-1">
-             ${data?.data?.totalRevenew?.toFixed(2) || 0}
+            <p className="text-2xl md:text-[28px] lg:text-[32px] leading-[150%] text-primary font-bold pt-2">
+             {data?.data?.totalRevenew || 0}
             </p>
           </div>
           <div>
-            <span className="flex items-center justify-center bg-[#E6F4E6] p-3 rounded-full">
-              <DollarSign  className="w-6 h-6 text-primary" />
+            <span className="flex items-center justify-center bg-[#DCE8F3] p-3 rounded-[8px]">
+              <Building2 className="w-6 h-6 text-[#1273EA]" />
             </span>
           </div>
         </div>
 
-        <div className="md:col-span-1 h-[139px] flex items-center justify-between bg-white shadow-[0px_4px_6px_0px_#0000001A] px-4 rounded-[8px]">
+        <div className="md:col-span-1 h-[128px] flex items-center justify-between bg-[#F8F8F8] border border-[#E2E2E2] shadow-[0px_2px_6px_0px_#00000014] px-4 rounded-[10px]">
           <div>
-            <p className="text-sm font-semibold text-[#424242] leading-[120%]">
-              Total Players
+            <p className="text-base md:text-lg leading-[150%] font-medium text-[#8E938F]">
+              Active Listings
             </p>
-            <p className="text-3xl leading-[120%] text-[#424242] font-bold font-hexco pt-1">
+            <p className="text-2xl md:text-[28px] lg:text-[32px] leading-[150%] text-primary font-bold pt-2">
               {data?.data?.totalPlayers || 0}
             </p>
           </div>
           <div>
-            <span className="flex items-center justify-center bg-[#E6F4E6] p-3 rounded-full">
-              <Users className="w-6 h-6 text-primary" />
+            <span className="flex items-center justify-center bg-[#DCE8F3] p-3 rounded-[8px]">
+              <List className="w-6 h-6 text-[#1273EA]" />
             </span>
           </div>
         </div>
 
-        <div className="md:col-span-1 h-[139px] flex items-center justify-between bg-white shadow-[0px_4px_6px_0px_#0000001A] px-4 rounded-[8px]">
+        <div className="md:col-span-1 h-[128px] flex items-center justify-between bg-[#F8F8F8] border border-[#E2E2E2] shadow-[0px_2px_6px_0px_#00000014] px-4 rounded-[10px]">
           <div>
-            <p className="text-sm font-semibold text-[#424242] leading-[120%]">
-              Total Contact
+            <p className="text-base md:text-lg leading-[150%] font-medium text-[#8E938F]">
+              New Inquiries
             </p>
-            <p className="text-3xl leading-[120%] text-[#424242] font-bold font-hexco pt-1">
+            <p className="text-2xl md:text-[28px] lg:text-[32px] leading-[150%] text-primary font-bold pt-2">
               {data?.data?.totalContact || 0}
             </p>
           </div>
           <div>
-            <span className="flex items-center justify-center bg-[#E6F4E6] p-3 rounded-full">
-              <Calendar className="w-6 h-6 text-primary" />
+            <span className="flex items-center justify-center bg-[#DCE8F3] p-3 rounded-[8px]">
+              <MessageSquare className="w-6 h-6 text-[#1273EA]" />
             </span>
           </div>
         </div>
 
-        <div className="md:col-span-1 h-[139px] flex items-center justify-between bg-white shadow-[0px_4px_6px_0px_#0000001A] px-4 rounded-[8px]">
+        <div className="md:col-span-1 h-[128px] flex items-center justify-between bg-[#F8F8F8] border border-[#E2E2E2] shadow-[0px_2px_6px_0px_#00000014] px-4 rounded-[10px]">
           <div>
-            <p className="text-sm font-semibold text-[#424242] leading-[120%]">
-              Total GK
+           <p className="text-base md:text-lg leading-[150%] font-medium text-[#8E938F]">
+              Blog Articles
             </p>
-            <p className="text-3xl leading-[120%] text-[#424242] font-bold font-hexco pt-1">
+            <p className="text-2xl md:text-[28px] lg:text-[32px] leading-[150%] text-primary font-bold pt-2">
               {data?.data?.totalGk || 0}
             </p>
           </div>
           <div>
-            <span className="flex items-center justify-center bg-[#E6F4E6] p-3 rounded-full">
-              <Users className="w-6 h-6 text-primary" />
+            <span className="flex items-center justify-center bg-[#DCE8F3] p-3 rounded-[8px]">
+              <FileText className="w-6 h-6 text-[#1273EA]" />
             </span>
           </div>
         </div>

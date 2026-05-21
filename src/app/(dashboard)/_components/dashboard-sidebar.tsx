@@ -1,14 +1,13 @@
 "use client";
 import {
-  LayoutDashboard,
+  LayoutGrid,
   LogOut,
   Settings,
-  Mail,
+  RefreshCw,
+  MessageSquare,
+  FileText,
+  MessageSquareText,
   Users,
-  CircleDollarSign,
-  // CreditCard,
-  MessageCircle,
-  TicketPercent,
 } from "lucide-react";
 
 import {
@@ -17,23 +16,19 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-
-import logo from "../../../../public/assets/images/logo.jpg";
 
 const items = [
   {
     title: "Dashboard Overview",
     url: "/",
-    icon: LayoutDashboard,
+    icon: LayoutGrid,
   },
   {
     title: "User Management",
@@ -41,37 +36,24 @@ const items = [
     icon: Users,
   },
   {
-    title: "Guest Management",
-    url: "/guest-management",
-    icon: Users,
+    title: "CRM Sync Status",
+    url: "/crm-sync-status",
+    icon: RefreshCw,
+  },
+  {
+    title: "Inquiries Management",
+    url: "/inquiries-management",
+    icon: MessageSquare,
+  },
+  {
+    title: "Blog Management",
+    url: "/blog-management",
+    icon: FileText,
   },
   {
     title: "Contact Management",
     url: "/contact-management",
-    icon: Mail,
-  },
-  {
-    title: "Newsletter Management",
-    url: "/newsletter-management",
-    icon: MessageCircle,
-  },
-    {
-    title: "Coupon Management",
-    url: "/coupon-management",
-    icon: TicketPercent ,
-  },
-
-
-
-  // {
-  //   title: "Pricing & Payment",
-  //   url: "/pricing-and-payment",
-  //   icon: CreditCard ,
-  // },
-  {
-    title: "Revenue",
-    url: "/revenue",
-    icon: CircleDollarSign,
+    icon: MessageSquareText,
   },
   {
     title: "Settings",
@@ -84,24 +66,20 @@ export function DashboardSidebar() {
   const pathName = usePathname();
 
   return (
-    <Sidebar className="border-none w-[330px]">
-      <SidebarContent className="bg-white scrollbar-hide">
+    <Sidebar className="border-none w-[280px]">
+      <SidebarContent className="bg-[#ECECEC] scrollbar-hide border-r border-[#D9D9D9]">
         <SidebarGroup className="p-0">
-          <div className="flex flex-col justify-between min-h-screen pb-5">
+          <div className="flex flex-col justify-between min-h-screen pb-6">
             <div>
-              <SidebarGroupLabel className="mt-5 mb-5 h-[80px] flex justify-center">
+              <div className="mt-8 mb-6 flex justify-center">
                 <Link href={`/`}>
-                  <Image
-                    src={logo}
-                    alt="logo"
-                    width={1000}
-                    height={1000}
-                    className="h-[100px] w-[240px] object-cover"
-                  />
+                  <h1 className="text-[44px] leading-none text-[#1273EA] font-hexco font-semibold">
+                    O21iwohnen
+                  </h1>
                 </Link>
-              </SidebarGroupLabel>
-              <SidebarGroupContent className="px-4 pt-5">
-                <SidebarMenu>
+              </div>
+              <SidebarGroupContent className="px-4 pt-1">
+                <SidebarMenu className="space-y-2">
                   {items.map((item) => {
                     const isActive =
                       item.url === "/"
@@ -112,14 +90,19 @@ export function DashboardSidebar() {
                     return (
                       <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton
-                          className={`h-[60px] rounded-none text-[20px] text-primary hover:bg-[#f8f9fa] hover:text-primary transition-all duration-300 ${
-                            isActive &&
-                            "bg-[#f8f9fa] hover:bg-[#f8f9fa] text-primary shadow-[0px_4px_6px_0px_#DF10201A] hover:text-primary hover:shadow-[0px_4px_6px_0px_#DF10201A] font-medium"
+                          className={`h-[46px] rounded-[6px] text-[15px] transition-all duration-200 ${
+                            isActive
+                              ? "bg-[#1273EA] hover:bg-[#1273EA] text-white hover:text-white font-semibold"
+                              : "bg-transparent hover:bg-[#E3E3E3] text-[#777777] hover:text-[#555555] font-medium"
                           }`}
                           asChild
                         >
                           <Link href={item.url}>
-                            <item.icon />
+                            <item.icon
+                              className={`!w-[18px] !h-[18px] ${
+                                isActive ? "text-white" : "text-[#8A8A8A]"
+                              }`}
+                            />
                             <span>{item.title}</span>
                           </Link>
                         </SidebarMenuButton>
@@ -131,12 +114,12 @@ export function DashboardSidebar() {
             </div>
 
             <div>
-              <SidebarFooter className="border-t border-gray-300">
+              <SidebarFooter className="px-4 pb-2">
                 <button
                   onClick={() => signOut({ callbackUrl: "/login" })}
-                  className="font-medium text-red-500 flex items-center gap-2 pl-2 mt-5"
+                  className="h-[46px] w-full font-medium text-[#FF2D3B] hover:text-[#E32634] flex items-center gap-3 px-3 rounded-[6px] hover:bg-[#FFEFF1] transition-all duration-200 text-[22px] leading-none font-hexco"
                 >
-                  <LogOut className="h-4 w-4" /> Log out
+                  <LogOut className="!w-[18px] !h-[18px]" /> Log out
                 </button>
               </SidebarFooter>
             </div>
