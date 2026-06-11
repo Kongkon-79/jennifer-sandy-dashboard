@@ -29,14 +29,14 @@ const mockInquiries = [
 const RecentInquiries = () => {
   return (
     <div className="px-6 pb-6">
-      <Card className="w-full border border-gray-200 bg-white shadow-[0px_2px_6px_0px_#0000000F] rounded-xl">
+      <Card className="w-full border border-[#E6E6E8] bg-white">
         <CardHeader className="pb-1 pt-5 px-5 flex flex-row items-center justify-between">
-          <CardTitle className="text-[22px] leading-[120%] font-semibold text-[#2E2E2E]">
+          <CardTitle className="text-lg leading-normal font-semibold text-[#343A40]">
             Recent Inquiries
           </CardTitle>
           <Link
-            href="#"
-            className="text-sm font-medium text-primary hover:underline"
+            href="/inquiries-management"
+            className="text-sm font-medium leading-normal text-primary hover:underline"
           >
             See all
           </Link>
@@ -46,15 +46,15 @@ const RecentInquiries = () => {
             <div
               key={inquiry.id}
               className={`grid grid-cols-1 md:grid-cols-[1.2fr_1fr_1fr_auto] gap-3 md:gap-4 items-center py-5 ${
-                index !== mockInquiries.length - 1 ? "border-b border-gray-200" : ""
+                index !== mockInquiries.length - 1 ? "border-b border-[#E6E6E8]" : ""
               }`}
             >
-              <p className="text-[24px] md:text-[28px] leading-[120%] font-medium text-[#2F2F2F] font-hexco">
+              <p className="text-base leading-normal font-semibold text-[#343A40]">
                 {inquiry.name}
               </p>
-              <p className="text-sm text-[#6F6F6F]">{inquiry.email}</p>
-              <p className="text-sm text-[#5D5D5D]">{inquiry.property}</p>
-              <p className="text-sm text-[#7A7A7A] justify-self-start md:justify-self-end">
+              <p className="text-sm text-[#68706A] font-normal leading-normal">{inquiry.email}</p>
+              <p className="text-sm text-[#68706A] font-normal leading-normal">{inquiry.property}</p>
+              <p className="text-sm text-[#68706A] font-normal leading-normal">
                 {inquiry.date}
               </p>
             </div>

@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import { QueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import { Camera } from "lucide-react";
 import { useSession } from "next-auth/react";
-import Image from "next/image";
+import Image, { type StaticImageData } from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { UserProfileApiResponse } from "./user-data-type";
+
+import NoUserImage from "../../../../../public/assets/images/no-user.jpeg"
 
 
 const ProfilePicture = () => {
@@ -15,10 +17,10 @@ const ProfilePicture = () => {
   const token = (session?.data?.user as { accessToken: string })?.accessToken;
   const queryClient = new QueryClient();
 
-  const [profileImage, setProfileImage] = useState("/assets/images/no-user.jpeg");
+  const [profilePicture, setProfilePicture] = useState<string | StaticImageData>(NoUserImage);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  console.log(setProfileImage)
+  console.log(setProfilePicture)
 
   // get api
   const { data } = useQuery<UserProfileApiResponse>({
@@ -64,11 +66,11 @@ const ProfilePicture = () => {
   });
 
   useEffect(() => {
-    const image = data?.data?.user?.profileImage;
+    const image = data?.data?.profilePicture;
     if (image) {
-      setProfileImage(image);
+      setProfilePicture(image);
     }
-  }, [data?.data?.user?.profileImage]);
+  }, [data?.data?.profilePicture]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -77,13 +79,13 @@ const ProfilePicture = () => {
     // Show preview
     const reader = new FileReader();
     reader.onloadend = () => {
-      setProfileImage(reader.result as string);
+      setProfilePicture(reader.result as string);
     };
     reader.readAsDataURL(file);
 
     // Upload file to backend
     const formData = new FormData();
-    formData.append("profileImage", file, file.name);
+    formData.append("profilePicture", file, file.name);
     mutate(formData);
   };
 
@@ -94,7 +96,7 @@ const ProfilePicture = () => {
       <div className="relative">
         <div className="w-32 h-32 rounded-full overflow-hidden border relative">
           <Image
-            src={profileImage}
+            src={profilePicture}
             alt="Profile"
             width={128}
             height={128}
@@ -114,7 +116,7 @@ const ProfilePicture = () => {
           {/* Camera Icon (Choose & Upload Image) */}
           <Button
             size="sm"
-            className="w-8 h-8 p-0 rounded-full bg-[#131313]"
+            className="w-8 h-8 p-0 rounded-full bg-primary"
             title="Upload new image"
             onClick={() => fileInputRef.current?.click()}
             disabled={isPending}

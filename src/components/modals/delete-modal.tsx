@@ -41,7 +41,7 @@ const DeleteModal = ({ isOpen, onClose, onConfirm, title, desc }: DeleteModalPro
           </div>
           <div className="col-span-1">
             <button
-              className="w-full text-[#F8F9FA] bg-[#E5102E] border border-[#E5102E] py-[10px] px-6 text-base font-medium leading-[120%] rounded-[8px]"
+              className="w-full text-[#F8F9FA] bg-primary py-[10px] px-6 text-base font-medium leading-[120%] rounded-[8px]"
               onClick={onConfirm}
             >
               Delete

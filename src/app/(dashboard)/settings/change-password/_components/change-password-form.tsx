@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { ChevronLeft, Eye, EyeOff } from "lucide-react";
 
 import { Button } from "@/components/ui/button"
 import {
@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input"
 import { useSession } from "next-auth/react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
+import Link from "next/link";
 
 const formSchema = z
   .object({
@@ -83,6 +84,11 @@ const ChangePasswordForm = () => {
   }
   return (
     <div className='py-6 px-8 bg-white rounded-[8px] shadow-[0_4px_8px_rgba(0,0,0,0.12)]'>
+       <div className="pb-2">
+        <Link href="/settings" className="flex items-center gap-1 text-sm text-gray-500 font-medium transition-colors hover:text-primary hover:underline">
+          <ChevronLeft /> Back to Settings
+        </Link>
+      </div>
       <div>
         <h4 className='text-xl md:text-2xl text-[#343A40] leading-[120%] font-semibold'>Changes Password</h4>
         <p className='text-base font-normal text-[#68706A] leading-[120%] pt-3'>Manage your account preferences, security settings, and privacy options.</p>
@@ -107,7 +113,7 @@ const ChangePasswordForm = () => {
                       <Input
                         {...field}
                         type={showCurrent ? "text" : "password"}
-                        placeholder="••••••••••••••••••"
+                        placeholder="********"
                         className="h-[48px] w-full rounded-[4px] border-[#C0C3C1] p-3 placeholder:text-[#8E959F] text-[#3B4759] text-base ring-0 outline-none leading-[120%] font-normal"
                       />
                     </FormControl>
@@ -140,7 +146,7 @@ const ChangePasswordForm = () => {
                       <Input
                         {...field}
                         type={showNew ? "text" : "password"}
-                        placeholder="••••••••••••••••••"
+                        placeholder="********"
                         className="h-[48px] w-full rounded-[4px] border-[#C0C3C1] p-3 placeholder:text-[#8E959F] text-[#3B4759] text-base ring-0 outline-none leading-[120%] font-normal"
                       />
                     </FormControl>
@@ -174,7 +180,7 @@ const ChangePasswordForm = () => {
                       <Input
                         {...field}
                         type={showConfirm ? "text" : "password"}
-                        placeholder="••••••••••••••••••"
+                        placeholder="********"
                         className="h-[48px] w-full rounded-[4px] border-[#C0C3C1] p-3 placeholder:text-[#8E959F] text-[#3B4759] text-base ring-0 outline-none leading-[120%] font-normal"
                       />
                     </FormControl>

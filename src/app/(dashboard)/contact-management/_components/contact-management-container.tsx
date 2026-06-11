@@ -16,7 +16,6 @@ import ContactManagementView from "./contact-management-view";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ContactApiResponse, ContactItem } from "./contact-data-type";
 import { useSession } from "next-auth/react";
-import moment from "moment";
 import TableSkeletonWrapper from "@/components/shared/TableSkeletonWrapper/TableSkeletonWrapper";
 import ErrorContainer from "@/components/shared/ErrorContainer/ErrorContainer";
 import NotFound from "@/components/shared/NotFound/NotFound";
@@ -81,7 +80,7 @@ const ContactManagementContainer = () => {
   else if (data && data?.data && data?.data?.length > 0){
     content = (
         <Table className="">
-          <TableHeader className="bg-[#E6F4E6] rounded-t-[12px]">
+          <TableHeader className="bg-[#E6F2FD] rounded-t-[12px]">
             <TableRow className="">
               <TableHead className="text-sm font-normal leading-[150%] text-[#343A40] py-4 pl-6">
                 Email Address
@@ -95,9 +94,6 @@ const ContactManagementContainer = () => {
               <TableHead className="text-sm font-normal leading-[150%] text-[#343A40] text-center py-4 ">
                 Message
               </TableHead>
-              <TableHead className="text-sm font-normal leading-[150%] text-[#343A40] text-center py-4 ">
-                Date
-              </TableHead>
               <TableHead className="text-sm font-normal leading-[150%] text-[#343A40] text-center py-4">
                 Action
               </TableHead>
@@ -108,19 +104,16 @@ const ContactManagementContainer = () => {
               return (
                 <TableRow key={index} className="">
                   <TableCell className="text-base font-medium text-[#68706A] leading-[150%] pl-6 py-4">
-                    {item?.email}
+                    {item?.email ? item?.email : "N/A"}
                   </TableCell>
                   <TableCell className="text-base font-normal text-[#68706A] leading-[150%] text-center py-4">
-                    {item?.fullName}
+                    {item?.fullName ? item?.fullName : "N/A"}
                   </TableCell>
                   <TableCell className="text-base font-normal text-[#68706A] leading-[150%] text-center py-4">
-                    {item?.phone}
+                    {item?.phone ? item?.phone : "N/A"}
                   </TableCell>
-                  <TableCell className="w-[400px] text-base font-normal text-[#68706A] leading-[150%] text-center py-4 line-clamp-1">
-                   <p className="truncate"> {item?.message}</p>
-                  </TableCell>
-                  <TableCell className="text-base font-medium text-[#343A40] leading-[150%] text-center py-4">
-                    {moment(item?.createdAt).format("MMM DD YYYY")}
+                  <TableCell className="text-base font-normal text-[#68706A] leading-[150%] text-center py-4">
+                   <p className="truncate"> {item?.message ? item?.message : "N/A"}</p>
                   </TableCell>
                   <TableCell className="h-full flex items-center justify-center gap-6 py-4">
                     <button
@@ -130,7 +123,7 @@ const ContactManagementContainer = () => {
                       }}
                       className="cursor-pointer mt-2"
                     >
-                      <Eye className="h-6 w-6" />
+                      <Eye className="h-6 w-6 text-primary" />
                     </button>
                     <button
                       onClick={() => {

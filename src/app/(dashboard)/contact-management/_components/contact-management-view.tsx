@@ -1,6 +1,5 @@
 import React from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import moment from "moment";
 import { ContactItem } from "./contact-data-type";
 
 const ContactManagementView = ({
@@ -20,19 +19,16 @@ const ContactManagementView = ({
 
         <div className="space-y-4">
           <p className="text-base font-normal text-[#6C757D)] leading-[150%]">
-            <strong className="text-base font-semibold text-[#343A40] leading-[150%]">Name :</strong> <br/> {contactData?.fullName}
+            <strong className="text-base font-semibold text-[#1E1E1E] leading-[150%]">Name :</strong> <br/> {contactData?.fullName}
           </p>
           <p className="text-base font-normal text-[#6C757D)] leading-[150%]">
-            <strong className="text-base font-semibold text-[#343A40] leading-[150%]">Email :</strong> <br/> {contactData?.email}
+            <strong className="text-base font-semibold text-[#1E1E1E] leading-[150%]">Email :</strong> <br/> {contactData?.email}
           </p>
           <p className="text-base font-normal text-[#6C757D)] leading-[150%]">
-            <strong className="text-base font-semibold text-[#343A40] leading-[150%]">Phone Number :</strong> <br/> {contactData?.phone}
+            <strong className="text-base font-semibold text-[#1E1E1E] leading-[150%]">Phone Number :</strong> <br/> {contactData?.phone}
           </p>
           <p className="text-base font-normal text-[#6C757D)] leading-[150%]">
-            <strong className="text-base font-semibold text-[#343A40] leading-[150%]">Date :</strong> <br/> {moment(contactData?.createdAt).format("MMM DD, YYYY")}
-          </p>
-          <p className="text-base font-normal text-[#6C757D)] leading-[150%]">
-            <strong className="text-base font-semibold text-[#343A40] leading-[150%]">Messages :</strong> <br/> {contactData?.message}
+            <strong className="text-base font-semibold text-[#1E1E1E] leading-[150%]">Messages :</strong> <br/> {contactData?.message}
           </p>
         </div>
       </DialogContent>

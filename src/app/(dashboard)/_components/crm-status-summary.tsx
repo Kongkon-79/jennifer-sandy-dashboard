@@ -4,28 +4,32 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 export default function CrmStatusSummary() {
   return (
-    <div className="px-6 pt-6">
-      <Card className="border border-gray-200 bg-[#F6F6F6] rounded-xl shadow-none">
+    <div className="px-6">
+      <Card className=" bg-white rounded-xl shadow-none">
         <CardHeader className="pb-2">
-          <CardTitle className="text-[32px] leading-[120%] font-semibold font-hexco text-[#2D2D2D]">
+          <CardTitle className="text-lg leading-[120%] font-semibold text-[#343A40]">
             CRM Status Summary
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-3">
-            <p className="text-sm text-[#7A7A7A]">
+            <p className="text-sm text-[#68706A] font-normal leading-normal">
               Connection Status:{" "}
-              <span className="inline-flex items-center rounded-full bg-[#E6F4E6] px-2.5 py-0.5 text-xs font-medium text-[#2B8A3E]">
+              <span className="inline-flex items-center rounded-full bg-[#EAF9F1] px-2.5 py-0.5 leading-normal text-xs font-medium text-[#008236]">
                 Connected
               </span>
             </p>
-            <p className="text-sm text-[#5A5A5A]">Last Sync Date: March 3, 2026</p>
-            <p className="text-sm text-[#5A5A5A]">Last Sync Time: 09:30 AM</p>
+            <p className="text-sm text-[#68706A] font-normal leading-normal">
+              Last Sync Date: <span className="font-medium text-[#343A40]">March 3, 2026</span> 
+            </p>
+            <p className="text-sm text-[#68706A] font-normal leading-normal">
+              Last Sync Time: <span className="font-medium text-[#343A40]">09:30 AM</span>
+            </p>
           </div>
 
           <Link
-            href="#"
-            className="inline-flex h-11 items-center justify-center rounded-lg bg-[#2F80ED] px-5 text-sm font-medium text-white transition-colors hover:bg-[#1F6FD9]"
+            href="/crm-sync-status"
+            className="inline-flex h-11 items-center justify-center rounded-[10px] bg-[#0678EF] px-5 text-sm font-semibold leading-normal text-[#F8F9FA] transition-colors hover:bg-[#1F6FD9]"
           >
             View Details
           </Link>

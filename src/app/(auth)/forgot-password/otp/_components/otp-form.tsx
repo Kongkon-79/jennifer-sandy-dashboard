@@ -70,7 +70,7 @@ export default function OtpForm() {
   const { mutate, isPending } = useMutation({
     mutationKey: ["verify-otp"],
     mutationFn: (values: { otp: string; email: string }) =>
-      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/verify-email`, {
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/verify`, {
         method: "POST",
         headers: {
           "content-type": "application/json",

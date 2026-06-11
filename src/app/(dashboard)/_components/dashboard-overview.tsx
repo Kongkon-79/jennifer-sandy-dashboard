@@ -58,13 +58,13 @@ export function DashboardOverview() {
     content = (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-6">
 
-        <div className="md:col-span-1 h-[128px] flex items-center justify-between bg-[#F8F8F8] border border-[#E2E2E2] shadow-[0px_2px_6px_0px_#00000014] px-4 rounded-[10px]">
+        <div className="md:col-span-1 h-[128px] flex items-center justify-between bg-white border border-[#E6E7E6] shadow-[0px_4px_6px_0px_rgba(0,0,0,0.1)]  px-4 rounded-[10px]">
           <div>
             <p className="text-base md:text-lg leading-[150%] font-medium text-[#8E938F]">
               Total Apartments
             </p>
             <p className="text-2xl md:text-[28px] lg:text-[32px] leading-[150%] text-primary font-bold pt-2">
-             {data?.data?.totalRevenew || 0}
+             {data?.data?.totalRevenew || 248}
             </p>
           </div>
           <div>
@@ -74,13 +74,13 @@ export function DashboardOverview() {
           </div>
         </div>
 
-        <div className="md:col-span-1 h-[128px] flex items-center justify-between bg-[#F8F8F8] border border-[#E2E2E2] shadow-[0px_2px_6px_0px_#00000014] px-4 rounded-[10px]">
+        <div className="md:col-span-1 h-[128px] flex items-center justify-between bg-white border border-[#E6E7E6] shadow-[0px_4px_6px_0px_rgba(0,0,0,0.1)]  px-4 rounded-[10px]">
           <div>
             <p className="text-base md:text-lg leading-[150%] font-medium text-[#8E938F]">
               Active Listings
             </p>
             <p className="text-2xl md:text-[28px] lg:text-[32px] leading-[150%] text-primary font-bold pt-2">
-              {data?.data?.totalPlayers || 0}
+              {data?.data?.totalPlayers || 187}
             </p>
           </div>
           <div>
@@ -90,13 +90,13 @@ export function DashboardOverview() {
           </div>
         </div>
 
-        <div className="md:col-span-1 h-[128px] flex items-center justify-between bg-[#F8F8F8] border border-[#E2E2E2] shadow-[0px_2px_6px_0px_#00000014] px-4 rounded-[10px]">
+        <div className="md:col-span-1 h-[128px] flex items-center justify-between bg-white border border-[#E6E7E6] shadow-[0px_4px_6px_0px_rgba(0,0,0,0.1)]  px-4 rounded-[10px]">
           <div>
             <p className="text-base md:text-lg leading-[150%] font-medium text-[#8E938F]">
               New Inquiries
             </p>
             <p className="text-2xl md:text-[28px] lg:text-[32px] leading-[150%] text-primary font-bold pt-2">
-              {data?.data?.totalContact || 0}
+              {data?.data?.totalContact || 248}
             </p>
           </div>
           <div>
@@ -106,13 +106,13 @@ export function DashboardOverview() {
           </div>
         </div>
 
-        <div className="md:col-span-1 h-[128px] flex items-center justify-between bg-[#F8F8F8] border border-[#E2E2E2] shadow-[0px_2px_6px_0px_#00000014] px-4 rounded-[10px]">
+        <div className="md:col-span-1 h-[128px] flex items-center justify-between bg-white border border-[#E6E7E6] shadow-[0px_4px_6px_0px_rgba(0,0,0,0.1)]  px-4 rounded-[10px]">
           <div>
            <p className="text-base md:text-lg leading-[150%] font-medium text-[#8E938F]">
               Blog Articles
             </p>
             <p className="text-2xl md:text-[28px] lg:text-[32px] leading-[150%] text-primary font-bold pt-2">
-              {data?.data?.totalGk || 0}
+              {data?.data?.totalGk || 248}
             </p>
           </div>
           <div>

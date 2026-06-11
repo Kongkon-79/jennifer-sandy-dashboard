@@ -33,7 +33,7 @@ const formSchema = z
   })
   .refine((data) => data.password === data.confirmPassword, {
     path: ["confirmPassword"],
-    message: "Passwords do not match.",
+    message: "Passwords don't match.",
   });
 
 

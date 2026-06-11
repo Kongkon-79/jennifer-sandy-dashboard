@@ -5,7 +5,7 @@ import ContactManagementContainer from './_components/contact-management-contain
 const ContactManagementPage = () => {
   return (
     <div>
-        <DashboardHeader title="Contact Management" desc="Ready to compete in your next match?"/>
+        <DashboardHeader title="Contact Management" desc="Review and moderate property listings"/>
         <ContactManagementContainer/>
     </div>
   )
