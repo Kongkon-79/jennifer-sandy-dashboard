@@ -132,7 +132,7 @@ const CrmSyncViewContainer = () => {
         <div className="bg-white rounded-3xl shadow-xl p-8 mb-8">
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
             <div>
-              <h1 className="text-4xl md:text-5xl font-semibold text-[#1E3A8A] leading-tight">
+              <h1 className="text-xl font-semibold text-[#1E3A8A] leading-tight">
                 {estate.objekttitel || "Skyline Luxury Apartments"}
               </h1>
               {(estate.ort || estate.strasse) && (

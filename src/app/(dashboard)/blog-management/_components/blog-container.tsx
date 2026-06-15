@@ -139,13 +139,22 @@ const BlogContainer = () => {
         <Table className="w-full border-collapse">
           <TableHeader className="bg-[#E6F2FD]">
             <TableRow className="hover:bg-transparent">
-              <TableHead className="w-[40%] py-4 pl-6 text-sm font-normal leading-[150%] text-[#343A40]">
+              <TableHead className="w-[25%] py-4 pl-6 text-sm font-normal leading-[150%] text-[#343A40]">
                 Title
               </TableHead>
-              <TableHead className="w-[35%] py-4 text-left text-sm font-normal leading-[150%] text-[#343A40]">
+              <TableHead className="w-[20%] py-4 text-left text-sm font-normal leading-[150%] text-[#343A40]">
                 Description
               </TableHead>
-              <TableHead className="w-[15%] py-4 text-center text-sm font-normal leading-[150%] text-[#343A40]">
+              <TableHead className="w-[12%] py-4 text-center text-sm font-normal leading-[150%] text-[#343A40]">
+                Author
+              </TableHead>
+              <TableHead className="w-[10%] py-4 text-center text-sm font-normal leading-[150%] text-[#343A40]">
+                Category
+              </TableHead>
+              <TableHead className="w-[10%] py-4 text-center text-sm font-normal leading-[150%] text-[#343A40]">
+                Status
+              </TableHead>
+              <TableHead className="w-[13%] py-4 text-center text-sm font-normal leading-[150%] text-[#343A40]">
                 Created On
               </TableHead>
               <TableHead className="w-[10%] py-4 text-center text-sm font-normal leading-[150%] text-[#343A40]">
@@ -159,7 +168,7 @@ const BlogContainer = () => {
                 <TableCell className={cn("py-3 pl-6 align-middle", index !== blogs.length - 1 && "border-b border-[#E6E7E6]")}>
                   <div className="flex items-center gap-3">
                     <Image
-                      src={blog.thembnail ? blog.thembnail : blogImage}
+                      src={blog.thumbnail ? blog.thumbnail : blogImage}
                       alt={blog.title}
                       width={48}
                       height={48}
@@ -170,10 +179,32 @@ const BlogContainer = () => {
                     </span>
                   </div>
                 </TableCell>
-                <TableCell className={cn("py-3 align-middle text-left text-base font-normal leading-[150%] text-[#68706A] max-w-[300px]", index !== blogs.length - 1 && "border-b border-[#E6E7E6]")}>
+                <TableCell className={cn("py-3 align-middle text-left text-base font-normal leading-[150%] text-[#68706A] max-w-[200px]", index !== blogs.length - 1 && "border-b border-[#E6E7E6]")}>
                   <div className="line-clamp-2 text-base font-normal leading-[150%] text-[#68706A]">
-                    {blog.description.replace(/<[^>]*>/g, "").trim()}
+                    {(blog.content || blog.description || "").replace(/<[^>]*>/g, "").trim() || blog.excerpt || ""}
                   </div>
+                </TableCell>
+                <TableCell className={cn("py-3 text-center align-middle text-base font-normal leading-[150%] text-[#68706A]", index !== blogs.length - 1 && "border-b border-[#E6E7E6]")}>
+                  {blog.author || "—"}
+                </TableCell>
+                <TableCell className={cn("py-3 text-center align-middle text-base font-normal leading-[150%] text-[#68706A]", index !== blogs.length - 1 && "border-b border-[#E6E7E6]")}>
+                  {blog.category ? (
+                    <span className="inline-flex rounded-[4px] bg-[#F0F0F0] px-2.5 py-1 text-xs font-medium text-[#68706A]">
+                      {blog.category}
+                    </span>
+                  ) : "—"}
+                </TableCell>
+                <TableCell className={cn("py-3 text-center align-middle", index !== blogs.length - 1 && "border-b border-[#E6E7E6]")}>
+                  <span
+                    className={cn(
+                      "inline-flex min-w-[72px] justify-center rounded-[4px] px-3 py-1.5 text-xs font-medium leading-[150%]",
+                      blog.isPublished
+                        ? "bg-[#E6F2FD] text-primary"
+                        : "bg-[#FEF8E6] text-[#DEA400]"
+                    )}
+                  >
+                    {blog.isPublished ? "Published" : "Draft"}
+                  </span>
                 </TableCell>
                 <TableCell className={cn("py-3 text-center align-middle text-base font-normal leading-[150%] text-[#68706A]", index !== blogs.length - 1 && "border-b border-[#E6E7E6]")}>
                   {moment(blog.createdAt).format("YYYY-MM-DD")}
