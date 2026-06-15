@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { Eye, RefreshCcw, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Eye, RefreshCcw } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 
@@ -13,7 +14,11 @@ import { cn } from "@/lib/utils";
 
 import crmImage from "../../../../../public/assets/images/crm.jpg"
 
-import type { CrmSyncStatusItem } from "./crm-sync-data-type";
+import type {
+  CrmSyncStatusItem,
+  EstatesApiResponse,
+  EstateItem,
+} from "./crm-sync-data-type";
 
 interface CrmSyncResponse {
   statusCode: number;
@@ -30,59 +35,6 @@ interface CrmSyncResponse {
 
 const itemsPerPage = 5;
 
-const mockCrmSyncItems: CrmSyncStatusItem[] = Array.from(
-  { length: 12 },
-  (_, index) => ({
-    _id: `crm-sync-${index + 1}`,
-    apartmentName: [
-      "Skyline Luxury Apartments",
-      "Modern Studio Midtown",
-      "Penthouse Suite",
-      "Garden View Apartment",
-      "Waterfront Condo",
-      "Riverside Residence",
-      "Urban Nest",
-      "Sunset Lofts",
-      "Harbor Heights",
-      "Metro Villas",
-      "Lakeside Retreat",
-      "City Edge Homes",
-    ][index],
-    date: [
-      "2026-03-03",
-      "2026-03-02",
-      "2026-03-01",
-      "2026-02-29",
-      "2026-02-28",
-      "2026-02-27",
-      "2026-02-26",
-      "2026-02-25",
-      "2026-02-24",
-      "2026-02-23",
-      "2026-02-22",
-      "2026-02-21",
-    ][index],
-    time: [
-      "09:30 AM",
-      "01:15 PM",
-      "10:00 AM",
-      "04:45 PM",
-      "11:30 PM",
-      "08:20 AM",
-      "07:05 PM",
-      "03:40 PM",
-      "12:10 PM",
-      "06:50 AM",
-      "02:25 PM",
-      "05:55 PM",
-    ][index],
-    updatedListings: [12, 8, 15, 20, 0, 9, 6, 14, 10, 7, 18, 11][index],
-    errors: [0, 0, 2, 0, 1, 0, 1, 0, 0, 3, 0, 1][index],
-    status: index === 3 ? "failed" : "success",
-    thumbnail: "/assets/images/blog.png",
-  }),
-);
-
 const formatSyncDate = (syncedAt: string): string => {
   const date = new Date(syncedAt);
   const options: Intl.DateTimeFormatOptions = {
@@ -96,12 +48,57 @@ const formatSyncDate = (syncedAt: string): string => {
   return date.toLocaleDateString("en-US", options);
 };
 
+const formatDateShort = (syncedAt: string): string => {
+  const date = new Date(syncedAt);
+  const options: Intl.DateTimeFormatOptions = {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  };
+  return date.toLocaleDateString("en-US", options);
+};
+
+const formatTimeShort = (syncedAt: string): string => {
+  const date = new Date(syncedAt);
+  const options: Intl.DateTimeFormatOptions = {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  };
+  return date.toLocaleDateString("en-US", options);
+};
+
+const getThumbnailUrl = (item: EstateItem): string => {
+  if (item.titleImage?.url) {
+    return item.titleImage.url;
+  }
+  if (item.images && item.images.length > 0) {
+    return item.images[0].url;
+  }
+  return "";
+};
+
+const mapEstateToSyncItem = (estate: EstateItem): CrmSyncStatusItem => ({
+  _id: estate._id,
+  onofficeId: estate.onofficeId,
+  apartmentName: estate.objekttitel,
+  date: formatDateShort(estate.syncedAt),
+  time: formatTimeShort(estate.syncedAt),
+  updatedListings: estate.wohnflaeche,
+  errors: 0,
+  status: estate.isActive ? "success" : "failed",
+  thumbnail: getThumbnailUrl(estate),
+  slug: estate.slug,
+});
+
 const CrmSyncStatusContainer = () => {
   const { data: session } = useSession();
   const token = (session?.user as { accessToken?: string })?.accessToken;
+  const router = useRouter();
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [syncItems, setSyncItems] = useState(mockCrmSyncItems);
+  const [syncItems, setSyncItems] = useState<CrmSyncStatusItem[]>([]);
+  const [isLoadingEstates, setIsLoadingEstates] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [syncModalOpen, setSyncModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<CrmSyncStatusItem | null>(
@@ -139,9 +136,39 @@ const CrmSyncStatusContainer = () => {
     }
   }, [token]);
 
+  const fetchEstates = useCallback(async () => {
+    if (!token) return;
+
+    setIsLoadingEstates(true);
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/onoffice/estates?limit=1000`,
+        {
+          method: "GET",
+          headers: {
+            accept: "*/*",
+          },
+        }
+      );
+
+      const response: EstatesApiResponse = await res.json();
+
+      if (response.success && Array.isArray(response.data)) {
+        const mappedItems = response.data.map(mapEstateToSyncItem);
+        setSyncItems(mappedItems);
+      }
+    } catch (error) {
+      console.error("Estates fetch error:", error);
+      toast.error("Failed to load estate data.");
+    } finally {
+      setIsLoadingEstates(false);
+    }
+  }, [token]);
+
   useEffect(() => {
     fetchSyncStatus();
-  }, [fetchSyncStatus]);
+    fetchEstates();
+  }, [fetchSyncStatus, fetchEstates]);
 
   const totalPages = Math.max(1, Math.ceil(syncItems.length / itemsPerPage));
 
@@ -169,7 +196,7 @@ const CrmSyncStatusContainer = () => {
   };
 
   const handleViewDetails = (item: CrmSyncStatusItem) => {
-    toast.info(`Details for ${item.apartmentName} will be added later.`);
+    router.push(`/crm-sync-status/${item._id}`);
   };
 
   const handleDelete = () => {
@@ -280,74 +307,90 @@ const CrmSyncStatusContainer = () => {
               </thead>
 
               <tbody className="border-b border-x border-[#E6E7E6]">
-                {paginatedItems.map((item, index) => (
-                  <tr
-                    key={item._id}
-                    className={cn(index !== paginatedItems.length - 1 && "border-b border-[#E6E7E6]")}
-                  >
-                    <td className="py-4 pl-6 align-middle">
-                      <div className="flex items-center gap-3">
-                        <Image
-                          src={crmImage}
-                          alt={item.apartmentName}
-                          width={40}
-                          height={40}
-                          className="h-10 w-10 rounded-[4px] object-cover"
-                        />
-                        <span className="text-base font-normal leading-[150%] text-[#68706A]">
-                          {item.apartmentName}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="py-4 text-center text-base font-normal leading-[150%] text-[#68706A]">
-                      {item.date}
-                    </td>
-                    <td className="py-4 text-center text-base font-normal leading-[150%] text-[#68706A]">
-                      {item.time}
-                    </td>
-                    <td className="py-4 text-center text-base font-normal leading-[150%] text-[#68706A]">
-                      {item.updatedListings}
-                    </td>
-                    <td className="py-4 text-center text-base font-normal leading-[150%] text-[#68706A]">
-                      {item.errors}
-                    </td>
-                    <td className="py-4 text-center align-middle">
-                      <span
-                        className={cn(
-                          "inline-flex min-w-[88px] justify-center rounded-[4px] px-4 py-2 text-sm font-medium leading-[150%]",
-                          item.status === "success"
-                            ? "bg-[#E6F2FD] text-primary"
-                            : "bg-[#FDECEF] text-[#FF3B30]",
-                        )}
-                      >
-                        {item.status === "success" ? "Success" : "Failed"}
-                      </span>
-                    </td>
-                    <td className="py-4 text-center align-middle">
-                      <div className="flex items-center justify-center gap-4">
-                        <button
-                          type="button"
-                          onClick={() => handleViewDetails(item)}
-                          className="text-primary transition-colors hover:opacity-80"
-                          aria-label={`View details for ${item.apartmentName}`}
-                        >
-                          <Eye className="h-5 w-5" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedItem(item);
-                            setDeleteModalOpen(true);
-                          }}
-                          className="text-[#FF3B30] transition-colors hover:opacity-80"
-                          aria-label={`Delete ${item.apartmentName}`}
-                        >
-                          <Trash2 className="h-5 w-5" />
-                        </button>
-                      </div>
+                {isLoadingEstates ? (
+                  <tr>
+                    <td colSpan={7} className="py-8 text-center text-base font-normal text-[#68706A]">
+                      Loading estate data...
                     </td>
                   </tr>
-                ))}
+                ) : paginatedItems.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-8 text-center text-base font-normal text-[#68706A]">
+                      No data available.
+                    </td>
+                  </tr>
+                ) : (
+                  paginatedItems.map((item, index) => (
+                    <tr
+                      key={item._id}
+                      className={cn(index !== paginatedItems.length - 1 && "border-b border-[#E6E7E6]")}
+                    >
+                      <td className="w-2/5 py-4 pl-6 align-middle">
+                        <div className=" flex items-center gap-3">
+                          {item.thumbnail ? (
+                            <img
+                              src={item.thumbnail}
+                              alt={item.apartmentName}
+                              width={40}
+                              height={40}
+                              className="h-10 w-10 rounded-[4px] object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = crmImage.src;
+                              }}
+                            />
+                          ) : (
+                            <Image
+                              src={crmImage}
+                              alt={item.apartmentName}
+                              width={40}
+                              height={40}
+                              className="h-10 w-10 rounded-[4px] object-cover"
+                            />
+                          )}
+                          <span className="text-base font-normal leading-[150%] text-[#68706A]">
+                            {item?.apartmentName}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-4 text-center text-base font-normal leading-[150%] text-[#68706A]">
+                        {item.date}
+                      </td>
+                      <td className="py-4 text-center text-base font-normal leading-[150%] text-[#68706A]">
+                        {item.time}
+                      </td>
+                      <td className="py-4 text-center text-base font-normal leading-[150%] text-[#68706A]">
+                        {item.updatedListings}
+                      </td>
+                      <td className="py-4 text-center text-base font-normal leading-[150%] text-[#68706A]">
+                        {item.errors}
+                      </td>
+                      <td className="py-4 text-center align-middle">
+                        <span
+                          className={cn(
+                            "inline-flex min-w-[88px] justify-center rounded-[4px] px-4 py-2 text-sm font-medium leading-[150%]",
+                            item.status === "success"
+                              ? "bg-[#E6F2FD] text-primary"
+                              : "bg-[#FDECEF] text-[#FF3B30]",
+                          )}
+                        >
+                          {item.status === "success" ? "Success" : "Failed"}
+                        </span>
+                      </td>
+                      <td className="py-4 text-center align-middle">
+                        <div className="flex items-center justify-center gap-4">
+                          <button
+                            type="button"
+                            onClick={() => handleViewDetails(item)}
+                            className="text-primary transition-colors hover:opacity-80"
+                            aria-label={`View details for ${item.apartmentName}`}
+                          >
+                            <Eye className="h-5 w-5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
