@@ -6,7 +6,19 @@ import Image from "next/image";
 import { ArrowLeft, MapPin, CheckCircle2, XCircle, AlertCircle, Loader2, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
-import type { EstateItem, EstatesApiResponse } from "../../_components/crm-sync-data-type";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+  type CarouselApi,
+} from "@/components/ui/carousel";
+import type {
+  EstateImage,
+  EstateItem,
+  EstatesApiResponse,
+} from "../../_components/crm-sync-data-type";
 import crmImage from "../../../../../../public/assets/images/crm.jpg";
 
 const formatSyncDate = (syncedAt: string): string => {
@@ -28,9 +40,9 @@ const CrmSyncViewContainer = () => {
   const [estate, setEstate] = useState<EstateItem | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Lightbox Modal State
-  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [thumbnailApi, setThumbnailApi] = useState<CarouselApi>();
 
   const fetchEstateDetails = useCallback(async () => {
     if (!token || !id) return;
@@ -65,22 +77,43 @@ const CrmSyncViewContainer = () => {
     fetchEstateDetails();
   }, [fetchEstateDetails]);
 
-  const heroUrl = estate?.titleImage?.url || estate?.images?.[0]?.url || "";
-  const galleryImages = estate?.images || [];
+  const galleryImages: EstateImage[] = estate
+    ? [estate.titleImage, ...(estate.images || [])]
+        .filter((image): image is EstateImage => Boolean(image?.url))
+        .filter(
+          (image, index, arr) =>
+            arr.findIndex((entry) => entry.url === image.url) === index
+        )
+    : [];
 
-  const openLightbox = (index: number) => setSelectedImageIndex(index);
-  const closeLightbox = () => setSelectedImageIndex(null);
+  const currentImage = galleryImages[selectedImageIndex];
+
+  useEffect(() => {
+    setSelectedImageIndex(0);
+  }, [estate?._id]);
+
+  useEffect(() => {
+    if (!thumbnailApi) return;
+    thumbnailApi.scrollTo(selectedImageIndex);
+  }, [selectedImageIndex, thumbnailApi]);
+
+  const selectImage = (index: number) => setSelectedImageIndex(index);
+  const openLightbox = (index: number) => {
+    setSelectedImageIndex(index);
+    setIsLightboxOpen(true);
+  };
+  const closeLightbox = () => setIsLightboxOpen(false);
 
   const goToPrevious = () => {
-    if (selectedImageIndex === null) return;
-    const prev = selectedImageIndex;
-    setSelectedImageIndex(prev === 0 ? galleryImages.length - 1 : prev - 1);
+    setSelectedImageIndex((prev) =>
+      prev === 0 ? galleryImages.length - 1 : prev - 1
+    );
   };
 
   const goToNext = () => {
-    if (selectedImageIndex === null) return;
-    const prev = selectedImageIndex;
-    setSelectedImageIndex(prev === galleryImages.length - 1 ? 0 : prev + 1);
+    setSelectedImageIndex((prev) =>
+      prev === galleryImages.length - 1 ? 0 : prev + 1
+    );
   };
 
   if (isLoading) {
@@ -110,138 +143,198 @@ const CrmSyncViewContainer = () => {
 
   return (
     <div className="bg-[#F8F9FA] min-h-screen pb-12">
+      <div className="mx-auto max-w-6xl px-4 pt-6 md:px-6">
+        <div className="overflow-hidden rounded-[14px] border border-[#D9E8FF] bg-white shadow-[0_8px_28px_rgba(15,23,42,0.08)]">
+          <button
+            type="button"
+            onClick={() => currentImage && openLightbox(selectedImageIndex)}
+            className="relative block h-[240px] w-full overflow-hidden bg-[#F3F6FB] text-left sm:h-[320px] lg:h-[430px]"
+          >
+            {currentImage?.url ? (
+              <img
+                src={currentImage.url}
+                alt={currentImage.title || estate.objekttitel || "Property image"}
+                className="h-full w-full object-cover transition-transform duration-300 hover:scale-[1.02]"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = crmImage.src;
+                }}
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center">
+                <Image src={crmImage} alt="Property" width={180} height={180} className="opacity-50" />
+              </div>
+            )}
+          </button>
 
-      {/* Hero Image */}
-      <div className="relative h-[420px] md:h-[520px] w-full overflow-hidden">
-        {heroUrl ? (
-          <img
-            src={heroUrl}
-            alt={estate.objekttitel}
-            className="h-full w-full object-cover"
-            onError={(e) => { (e.target as HTMLImageElement).src = crmImage.src; }}
-          />
-        ) : (
-          <div className="h-full w-full bg-gray-100 flex items-center justify-center">
-            <Image src={crmImage} alt="Property" width={180} height={180} className="opacity-50" />
-          </div>
-        )}
-      </div>
+          {galleryImages.length > 1 && (
+            <div className="border-t border-[#E6E7E6] bg-white p-3 md:p-4">
+              <Carousel
+                setApi={setThumbnailApi}
+                opts={{ align: "start", containScroll: "trimSnaps", dragFree: true }}
+                className="w-full"
+              >
+                <CarouselContent className="-ml-3">
+                  {galleryImages.map((img, idx) => (
+                    <CarouselItem
+                      key={img.id || `${img.url}-${idx}`}
+                      className="basis-1/2 pl-3 sm:basis-1/3 lg:basis-1/4"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => selectImage(idx)}
+                        className={cn(
+                          "group relative h-[72px] w-full overflow-hidden rounded-[10px] border-2 bg-[#F3F6FB] transition-all duration-200 sm:h-[88px] lg:h-[96px]",
+                          selectedImageIndex === idx
+                            ? "border-[#2F80ED] ring-2 ring-[#BFDBFE]"
+                            : "border-transparent hover:border-[#93C5FD]"
+                        )}
+                      >
+                        <img
+                          src={img.url}
+                          alt={img.title || `Property image ${idx + 1}`}
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = crmImage.src;
+                          }}
+                        />
+                      </button>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious className="left-2 top-1/2 h-9 w-9 -translate-y-1/2 border-[#D9E8FF] bg-white text-[#1E3A8A] shadow-md hover:bg-[#F8FBFF]" />
+                <CarouselNext className="right-2 top-1/2 h-9 w-9 -translate-y-1/2 border-[#D9E8FF] bg-white text-[#1E3A8A] shadow-md hover:bg-[#F8FBFF]" />
+              </Carousel>
+            </div>
+          )}
+        </div>
+        <div className="relative z-10 px-0 pt-6">
+          <div className="mb-8 rounded-3xl bg-white p-8 shadow-xl">
+            <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+              <div>
+                <h1 className="text-xl font-semibold leading-tight text-[#1E3A8A]">
+                  {estate.objekttitel || "Skyline Luxury Apartments"}
+                </h1>
+                {(estate.ort || estate.strasse) && (
+                  <p className="mt-4 flex items-center gap-3 text-lg text-gray-600">
+                    <MapPin className="h-6 w-6" />
+                    {[estate.strasse, estate.hausnummer, estate.plz, estate.ort]
+                      .filter(Boolean)
+                      .join(", ")}
+                  </p>
+                )}
+              </div>
 
-      <div className="max-w-6xl mx-auto px-6 -mt-8 relative z-10">
-        {/* Title & Meta */}
-        <div className="bg-white rounded-3xl shadow-xl p-8 mb-8">
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
-            <div>
-              <h1 className="text-xl font-semibold text-[#1E3A8A] leading-tight">
-                {estate.objekttitel || "Skyline Luxury Apartments"}
-              </h1>
-              {(estate.ort || estate.strasse) && (
-                <p className="mt-4 flex items-center gap-3 text-lg text-gray-600">
-                  <MapPin className="h-6 w-6" />
-                  {[estate.strasse, estate.hausnummer, estate.plz, estate.ort].filter(Boolean).join(", ")}
-                </p>
+              <div className="flex-shrink-0">
+                <span
+                  className={cn(
+                    "inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold",
+                    estate.isActive
+                      ? "bg-emerald-100 text-emerald-700"
+                      : "bg-red-100 text-red-700"
+                  )}
+                >
+                  {estate.isActive ? (
+                    <CheckCircle2 className="h-5 w-5" />
+                  ) : (
+                    <XCircle className="h-5 w-5" />
+                  )}
+                  {estate.isActive ? "Active" : "Inactive"}
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-8 flex flex-wrap gap-x-8 gap-y-3 text-sm text-gray-700">
+              {estate.wohnflaeche && (
+                <span>
+                  <strong>{estate.wohnflaeche} m²</strong>
+                </span>
+              )}
+              {estate.anzahl_zimmer && (
+                <span>
+                  <strong>{estate.anzahl_zimmer} Rooms</strong>
+                </span>
+              )}
+              <span>
+                <strong>Balcony</strong>
+              </span>
+              {estate.syncedAt && (
+                <span>Available from {formatSyncDate(estate.syncedAt)}</span>
               )}
             </div>
-
-            <div className="flex-shrink-0">
-              <span className={cn(
-                "inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold",
-                estate.isActive ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"
-              )}>
-                {estate.isActive ? <CheckCircle2 className="h-5 w-5" /> : <XCircle className="h-5 w-5" />}
-                {estate.isActive ? "Active" : "Inactive"}
-              </span>
-            </div>
           </div>
 
-          <div className="mt-8 flex flex-wrap gap-x-8 gap-y-3 text-sm text-gray-700">
-            {estate.wohnflaeche && <span><strong>{estate.wohnflaeche} m²</strong></span>}
-            {estate.anzahl_zimmer && <span><strong>{estate.anzahl_zimmer} Rooms</strong></span>}
-            <span><strong>Balcony</strong></span>
-            {estate.syncedAt && <span>Available from {formatSyncDate(estate.syncedAt)}</span>}
+          <div className="mb-10 rounded-3xl bg-white p-8 shadow">
+            <h2 className="mb-5 text-2xl font-semibold text-gray-900">
+              Description
+            </h2>
+            <p className="text-[17px] leading-relaxed text-gray-600">
+              {`A beautiful ${estate.objekttitel || "property"} located in ${estate.ort || "a prime location"}. ${estate.anzahl_zimmer ? `This property features ${estate.anzahl_zimmer} rooms` : ""} ${estate.wohnflaeche ? `with a living area of ${estate.wohnflaeche} m².` : "."}`}
+            </p>
           </div>
-        </div>
 
-        {/* Gallery - Clickable */}
-        {galleryImages.length > 0 && (
-          <div className="mb-12">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {galleryImages.map((img, idx) => (
-                <div
-                  key={img.id || idx}
-                  className="aspect-video overflow-hidden rounded-2xl border border-gray-100 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200"
-                  onClick={() => openLightbox(idx)}
-                >
-                  <img
-                    src={img.url}
-                    alt={img.title || `Image ${idx + 1}`}
-                    className="h-full w-full object-cover hover:scale-105 transition-transform duration-300"
-                    onError={(e) => { (e.target as HTMLImageElement).src = crmImage.src; }}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Description */}
-        <div className="bg-white rounded-3xl p-8 mb-10 shadow">
-          <h2 className="text-2xl font-semibold mb-5 text-gray-900">Description</h2>
-          <p className="text-gray-600 leading-relaxed text-[17px]">
-            {`A beautiful ${estate.objekttitel || "property"} located in ${estate.ort || "a prime location"}. ${estate.anzahl_zimmer ? `This property features ${estate.anzahl_zimmer} rooms` : ""} ${estate.wohnflaeche ? `with a living area of ${estate.wohnflaeche} m².` : "."}`}
-          </p>
-        </div>
-
-        {/* Amenities & Why Choose Section (same as previous) */}
-        <div className="bg-white rounded-3xl p-8 mb-10 shadow">
-          <h2 className="text-2xl font-semibold mb-8 text-gray-900">Amenities</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
-            {/* Left Column */}
-            <div className="space-y-6">
-              {["Furnished", "Transportation & parking", "Wi-Fi", "Elevator", "Fitted Kitchen"].map((item, i) => (
-                <div key={i} className="flex gap-4">
-                  <div className="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center flex-shrink-0">
-                    <CheckCircle2 className="w-5 h-5 text-blue-600" />
+          <div className="mb-10 rounded-3xl bg-white p-8 shadow">
+            <h2 className="mb-8 text-2xl font-semibold text-gray-900">
+              Amenities
+            </h2>
+            <div className="grid grid-cols-1 gap-x-12 gap-y-6 md:grid-cols-2">
+              <div className="space-y-6">
+                {[
+                  "Furnished",
+                  "Transportation & parking",
+                  "Wi-Fi",
+                  "Elevator",
+                  "Fitted Kitchen",
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-4">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-blue-50">
+                      <CheckCircle2 className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <p className="pt-1 font-medium">{item}</p>
                   </div>
-                  <p className="font-medium pt-1">{item}</p>
-                </div>
-              ))}
-            </div>
-            {/* Right Column */}
-            <div className="space-y-6">
-              {["Emergency Alert System", "Move-in coordination", "Meal preparation and service", "Pet-friendly", "24/7 Security"].map((item, i) => (
-                <div key={i} className="flex gap-4">
-                  <div className="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center flex-shrink-0">
-                    <CheckCircle2 className="w-5 h-5 text-blue-600" />
+                ))}
+              </div>
+              <div className="space-y-6">
+                {[
+                  "Emergency Alert System",
+                  "Move-in coordination",
+                  "Meal preparation and service",
+                  "Pet-friendly",
+                  "24/7 Security",
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-4">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-blue-50">
+                      <CheckCircle2 className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <p className="pt-1 font-medium">{item}</p>
                   </div>
-                  <p className="font-medium pt-1">{item}</p>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Why Choose */}
-        <div className="bg-white rounded-3xl p-8 shadow">
-          <h2 className="text-2xl font-semibold mb-6 text-gray-900">Why Choose Skyline Luxury Apartments?</h2>
-          <ul className="space-y-4 text-gray-600">
-            {[
-              "Comfortable living space – modern rooms and cozy common areas designed for relaxation",
-              "Personalized Care Plans – Tailored assistance to meet individual health and lifestyle needs",
-              "Engaging Activities – Social, cultural, and recreational programs that keep residents active and happy",
-              "24/7 Safety & Support – Secure environment with round-the-clock professional staff"
-            ].map((text, i) => (
-              <li key={i} className="flex gap-3">
-                <CheckCircle2 className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
-                {text}
-              </li>
-            ))}
-          </ul>
+          <div className="rounded-3xl bg-white p-8 shadow">
+            <h2 className="mb-6 text-2xl font-semibold text-gray-900">
+              Why Choose Skyline Luxury Apartments?
+            </h2>
+            <ul className="space-y-4 text-gray-600">
+              {[
+                "Comfortable living space – modern rooms and cozy common areas designed for relaxation",
+                "Personalized Care Plans – Tailored assistance to meet individual health and lifestyle needs",
+                "Engaging Activities – Social, cultural, and recreational programs that keep residents active and happy",
+                "24/7 Safety & Support – Secure environment with round-the-clock professional staff",
+              ].map((text, i) => (
+                <li key={i} className="flex gap-3">
+                  <CheckCircle2 className="mt-0.5 h-6 w-6 flex-shrink-0 text-blue-600" />
+                  {text}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
 
       {/* ==================== LIGHTBOX MODAL ==================== */}
-      {selectedImageIndex !== null && galleryImages[selectedImageIndex] && (
+      {isLightboxOpen && galleryImages[selectedImageIndex] && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90" onClick={closeLightbox}>
           <div className="relative max-w-5xl w-full px-4" onClick={(e) => e.stopPropagation()}>
             {/* Close Button */}

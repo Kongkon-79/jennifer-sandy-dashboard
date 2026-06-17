@@ -5,6 +5,14 @@ import AuthProvider from "@/components/providers/AuthProvider";
 import AppProvider from "@/components/providers/AppProvider";
 
 import { Manrope } from "next/font/google";
+import Script from "next/script";
+import { Suspense } from "react";
+import dynamic from "next/dynamic";
+
+
+// ✅ CLIENT ONLY IMPORT (IMPORTANT)
+const LangConfig = dynamic(() => import("./lang-config"), { ssr: false });
+const TranslateProvider = dynamic(() => import("@/components/providers/TranslateProvider"), { ssr: false });
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -22,8 +30,32 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`font-manrope antialiased`}>
         <AuthProvider>
           <AppProvider>
+              {/* ✅ Google translate container */}
+            <div id="google_translate_element"></div>
+
+            {/* ✅ Loaded only on client */}
+            <Suspense fallback={null}>
+              <LangConfig />
+            </Suspense>
+            <Suspense fallback={null}>
+              <TranslateProvider />
+            </Suspense>
+
+               {/* Load Google Translate script after components are ready */}
+            <Script
+              src="//translate.google.com/translate_a/element.js?cb=TranslateInit"
+              strategy="lazyOnload"
+            />
 
             {children}
+
+             {/* ✅ Load google script after client ready */}
+            <Script
+              src="//translate.google.com/translate_a/element.js?cb=TranslateInit"
+              strategy="afterInteractive"
+            />
+
+
             <Toaster />
 
           </AppProvider>

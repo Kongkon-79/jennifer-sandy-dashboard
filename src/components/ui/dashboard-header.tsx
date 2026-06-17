@@ -1,18 +1,31 @@
 import React from "react";
+import LanguageSwitcher from "../language-switcher";
 
-const DashboardHeader = ({title, desc}: {title:string, desc:string}) => {
+type DashboardHeaderProps = {
+  title: string;
+  desc: string;
+};
+
+const DashboardHeader = ({ title, desc }: DashboardHeaderProps) => {
   return (
-    <div className="sticky top-0  z-50">
-      {/* Header */}
-      <div className="bg-white p-6 ">
-        <h1 className="text-2xl lg:text-3xl font-bold text-primary leading-[150%]">
-          {title}
-        </h1>
-        <p className="text-sm font-normal text-[#68706A] leading-[150%]">
-          {desc}
-        </p>
+    <header className="sticky top-0 z-50 bg-[#F8F9FA]/95 backdrop-blur-sm">
+      <div className="flex w-full flex-col gap-4 rounded-[14px] border border-[#E6E7E6] bg-white px-5 py-5 shadow-[0_8px_24px_rgba(15,23,42,0.06)] md:px-6 lg:flex-row lg:items-center lg:justify-between">
+        <div className="min-w-0 space-y-2">
+          <div className="space-y-1">
+            <h1 className="text-2xl font-bold leading-[130%] text-primary md:text-3xl">
+              {title}
+            </h1>
+            <p className="max-w-3xl text-sm leading-[170%] text-[#68706A] md:text-base">
+              {desc}
+            </p>
+          </div>
+        </div>
+
+        <div className="w-full rounded-[12px] bg-[#F8F9FA] p-3 lg:w-auto lg:min-w-[260px]">
+          <LanguageSwitcher />
+        </div>
       </div>
-    </div>
+    </header>
   );
 };
 

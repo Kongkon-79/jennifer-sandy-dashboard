@@ -17,9 +17,12 @@ const BlogView = ({
 }) => {
   if (!blogData) return null;
 
+
+  console.log("BlogView render with data:", blogData);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl p-0 bg-white !rounded-[12px] max-h-[85vh] flex flex-col">
+      <DialogContent className="max-w-4xl w-[calc(100vw-2rem)] p-0 bg-white !rounded-[12px] max-h-[90vh] flex flex-col">
         {/* Thumbnail */}
         {blogData.thumbnail && (
           <div className="relative h-56 w-full shrink-0">
@@ -32,7 +35,7 @@ const BlogView = ({
           </div>
         )}
 
-        <div className="p-6 space-y-4 overflow-y-auto flex-1">
+        <div className="p-8 space-y-5 overflow-y-auto flex-1">
           {/* Title */}
           <h2 className="text-2xl font-semibold text-[#1E1E1E] leading-[130%] break-words">
             {blogData.title}
@@ -91,19 +94,12 @@ const BlogView = ({
             </div>
           )}
 
-          {/* Excerpt */}
-          {blogData.excerpt && (
-            <p className="text-sm italic text-[#6C757D] border-l-2 border-[#D9D9D9] pl-3">
-              {blogData.excerpt}
-            </p>
-          )}
-
           {/* Divider */}
           <div className="h-px bg-[#E6E7E6]" />
 
           {/* Content (HTML content) */}
           <div
-            className="text-[#343A40] leading-[170%] break-words overflow-wrap-break-word [&_h1]:text-2xl [&_h1]:font-semibold [&_h1]:mb-3 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:mb-3 [&_h3]:text-lg [&_h3]:font-medium [&_h3]:mb-2 [&_p]:text-base [&_p]:text-[#343A40] [&_p]:leading-[170%] [&_p]:mb-3 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-[8px] [&_img]:my-3 [&_a]:text-primary [&_a]:underline [&_a]:break-all [&_ul]:mb-3 [&_ol]:mb-3 [&_ul>li]:ml-5 [&_ol>li]:ml-5 [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_pre]:bg-[#F8F9FA] [&_pre]:p-3 [&_pre]:rounded-[8px] [&_pre]:overflow-x-auto [&_code]:break-words [&_table]:w-full [&_table]:border-collapse [&_td]:border [&_td]:border-[#D9D9D9] [&_td]:p-2 [&_th]:border [&_th]:border-[#D9D9D9] [&_th]:p-2"
+            className="text-[#343A40] leading-[170%] break-words overflow-wrap-break-word [&_h1]:text-2xl [&_h1]:font-semibold [&_h1]:mb-3 [&_h1]:mt-4 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:mb-3 [&_h2]:mt-3 [&_h3]:text-lg [&_h3]:font-medium [&_h3]:mb-2 [&_h3]:mt-2 [&_p]:text-base [&_p]:text-[#343A40] [&_p]:leading-[170%] [&_p]:mb-3 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-[8px] [&_img]:my-4 [&_a]:text-primary [&_a]:underline [&_a]:break-all [&_ul]:mb-3 [&_ol]:mb-3 [&_ul>li]:ml-5 [&_ol>li]:ml-5 [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_pre]:bg-[#F8F9FA] [&_pre]:p-4 [&_pre]:rounded-[8px] [&_pre]:overflow-x-auto [&_code]:break-words [&_table]:w-full [&_table]:border-collapse [&_td]:border [&_td]:border-[#D9D9D9] [&_td]:p-3 [&_th]:border [&_th]:border-[#D9D9D9] [&_th]:p-3 [&_blockquote]:border-l-4 [&_blockquote]:border-primary [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-[#6C757D] [&_blockquote]:my-4"
             dangerouslySetInnerHTML={{ __html: blogData.content || blogData.description || "" }}
           />
         </div>
