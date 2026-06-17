@@ -549,7 +549,7 @@ const BlogRichTextEditor = ({
           aria-multiline="true"
           suppressContentEditableWarning
           className={cn(
-            "min-h-[260px] max-h-[500px] overflow-y-auto rounded-b-[8px] px-4 py-3 text-sm leading-7 text-[#343A40] outline-none break-words",
+            "min-h-[260px] max-h-[260px] overflow-y-auto rounded-b-[8px] px-4 py-3 text-sm leading-7 text-[#343A40] outline-none break-words",
             "[&_*]:break-words [&_*]:overflow-wrap-break-word",
             "[&>h1]:mb-3 [&>h1]:text-3xl [&>h1]:font-bold [&>h2]:mb-3 [&>h2]:text-2xl [&>h2]:font-semibold [&>p]:mb-3 [&>p]:leading-7 [&>ul]:mb-3 [&>ol]:mb-3 [&>ul>li]:ml-5 [&>ol>li]:ml-5 [&>img]:max-w-full [&>img]:cursor-pointer",
             "[&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:break-words [&_a]:break-all",

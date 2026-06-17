@@ -58,6 +58,11 @@ const items = [
     url: "/contact-management",
     icon: MessageSquareText,
   },
+   {
+    title: "Landlord Contact",
+    url: "/landlord-contact",
+    icon: MessageSquareText,
+  },
   {
     title: "Settings",
     url: "/settings",

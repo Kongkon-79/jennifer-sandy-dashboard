@@ -14,7 +14,7 @@ export interface ContactItem {
   _id: string;
   fullName: string;
   email: string;
-  phone: string;
+  phoneNumber: string;
   message: string;
   createdAt: string;  // or Date if you convert it
   updatedAt: string;  // or Date if you convert it

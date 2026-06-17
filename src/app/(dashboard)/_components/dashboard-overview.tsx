@@ -5,42 +5,45 @@ import DashboardOverviewSkeleton from "./dashboard-overview-skeleton";
 import ErrorContainer from "@/components/shared/ErrorContainer/ErrorContainer";
 import { useSession } from "next-auth/react";
 
-export interface DashboardOverviewApiResponse {
-  statusCode: number
-  success: boolean
-  message: string
-  data: DashboardOverviewData
+export interface DashboardOverviewResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: DashboardOverview;
 }
 
-export interface DashboardOverviewData {
-  totalRevenew: number
-  totalPlayers: number
-  totalContact: number
-  totalGk: number
+export interface DashboardOverview {
+  totalUser: number;
+  activeUser: number;
+  suspended: number;
+  totalApartment: number;
+  newEnquiry: number;
+  blogpost: number;
 }
-
-
 
 export function DashboardOverview() {
-
   const session = useSession();
   const token = (session?.data?.user as { accessToken: string })?.accessToken;
 
-  const { data, isLoading, isError, error } = useQuery<DashboardOverviewApiResponse>({
-    queryKey: ["dashboard-overview"],
-    queryFn: async () => {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/dashboard/overview`, {
-        method: "GET",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-        }
-      })
-      return await res.json()
-    },
-    enabled: !!token
-  })
+  const { data, isLoading, isError, error } =
+    useQuery<DashboardOverviewResponse>({
+      queryKey: ["dashboard-overview"],
+      queryFn: async () => {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/dashboard/overview`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+        return await res.json();
+      },
+      enabled: !!token,
+    });
 
-  console.log(data)
+  console.log(data);
 
   let content;
 
@@ -51,20 +54,21 @@ export function DashboardOverview() {
       </div>
     );
   } else if (isError) {
-    content = <div className="p-6">
-      <ErrorContainer message={error?.message || "Something went wrong"} />
-    </div>;
+    content = (
+      <div className="p-6">
+        <ErrorContainer message={error?.message || "Something went wrong"} />
+      </div>
+    );
   } else {
     content = (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-6">
-
         <div className="md:col-span-1 h-[128px] flex items-center justify-between bg-white border border-[#E6E7E6] shadow-[0px_4px_6px_0px_rgba(0,0,0,0.1)]  px-4 rounded-[10px]">
           <div>
             <p className="text-base md:text-lg leading-[150%] font-medium text-[#8E938F]">
               Total Apartments
             </p>
             <p className="text-2xl md:text-[28px] lg:text-[32px] leading-[150%] text-primary font-bold pt-2">
-             {data?.data?.totalRevenew || 248}
+              {data?.data?.totalApartment || 0}
             </p>
           </div>
           <div>
@@ -80,7 +84,7 @@ export function DashboardOverview() {
               Active Listings
             </p>
             <p className="text-2xl md:text-[28px] lg:text-[32px] leading-[150%] text-primary font-bold pt-2">
-              {data?.data?.totalPlayers || 187}
+              {data?.data?.activeUser || 0}
             </p>
           </div>
           <div>
@@ -96,7 +100,7 @@ export function DashboardOverview() {
               New Inquiries
             </p>
             <p className="text-2xl md:text-[28px] lg:text-[32px] leading-[150%] text-primary font-bold pt-2">
-              {data?.data?.totalContact || 248}
+              {data?.data?.newEnquiry || 0}
             </p>
           </div>
           <div>
@@ -108,11 +112,11 @@ export function DashboardOverview() {
 
         <div className="md:col-span-1 h-[128px] flex items-center justify-between bg-white border border-[#E6E7E6] shadow-[0px_4px_6px_0px_rgba(0,0,0,0.1)]  px-4 rounded-[10px]">
           <div>
-           <p className="text-base md:text-lg leading-[150%] font-medium text-[#8E938F]">
+            <p className="text-base md:text-lg leading-[150%] font-medium text-[#8E938F]">
               Blog Articles
             </p>
             <p className="text-2xl md:text-[28px] lg:text-[32px] leading-[150%] text-primary font-bold pt-2">
-              {data?.data?.totalGk || 248}
+              {data?.data?.blogpost || 0}
             </p>
           </div>
           <div>
@@ -121,17 +125,9 @@ export function DashboardOverview() {
             </span>
           </div>
         </div>
-
-      </div> 
+      </div>
     );
   }
 
-
-
-  return (
-    <div className="">
-      {content}
-
-    </div>
-  );
+  return <div className="">{content}</div>;
 }

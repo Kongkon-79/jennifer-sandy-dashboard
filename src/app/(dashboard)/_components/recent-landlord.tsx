@@ -6,21 +6,18 @@ import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import moment from "moment";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { AllInquiryApiResponse, Inquiry } from "../inquiries-management/_components/inquiries-management-data-type";
+import type { LandlordSubmissionsApiResponse, LandlordSubmission } from "../landlord-contact/_component/landlord-contact-data-type";
 
-interface RecentInquiriesProps {
-  limit?: number;
-}
-
-const RecentInquiries = ({ limit = 3 }: RecentInquiriesProps) => {
+const RecentLandlords = () => {
+  const limit = 3;
   const session = useSession();
   const token = (session?.data?.user as { accessToken: string })?.accessToken;
 
-  const { data, isLoading, isError } = useQuery<AllInquiryApiResponse>({
-    queryKey: ["recent-inquiries"],
+  const { data, isLoading, isError } = useQuery<LandlordSubmissionsApiResponse>({
+    queryKey: ["recent-landlords"],
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/inquiry?page=1&limit=${limit}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/landlord?page=1&limit=${limit}`,
         {
           method: "GET",
           headers: {
@@ -33,7 +30,7 @@ const RecentInquiries = ({ limit = 3 }: RecentInquiriesProps) => {
     enabled: !!token,
   });
 
-  const inquiries = data?.data ?? [];
+  const landlords = data?.data ?? [];
 
   let content;
 
@@ -43,13 +40,12 @@ const RecentInquiries = ({ limit = 3 }: RecentInquiriesProps) => {
         {Array.from({ length: limit }).map((_, index) => (
           <div
             key={index}
-            className={`grid grid-cols-1 md:grid-cols-[1.2fr_1fr_1fr_auto] gap-3 md:gap-4 items-center py-5 ${
+            className={`grid grid-cols-1 md:grid-cols-[1.2fr_1fr_auto] gap-3 md:gap-4 items-center py-5 ${
               index !== limit - 1 ? "border-b border-[#E6E6E8]" : ""
             }`}
           >
             <Skeleton className="h-5 w-32" />
             <Skeleton className="h-4 w-40" />
-            <Skeleton className="h-4 w-36" />
             <Skeleton className="h-4 w-24" />
           </div>
         ))}
@@ -59,39 +55,36 @@ const RecentInquiries = ({ limit = 3 }: RecentInquiriesProps) => {
     content = (
       <div className="py-8 text-center">
         <p className="text-sm text-[#FF3B30] font-normal leading-normal">
-          Failed to load inquiries.
+          Failed to load landlords.
         </p>
       </div>
     );
-  } else if (inquiries.length === 0) {
+  } else if (landlords.length === 0) {
     content = (
       <div className="py-8 text-center">
         <p className="text-sm text-[#68706A] font-normal leading-normal">
-          No inquiries available.
+          No landlords available.
         </p>
       </div>
     );
   } else {
     content = (
       <>
-        {inquiries.map((inquiry: Inquiry, index: number) => (
+        {landlords.map((landlord: LandlordSubmission, index: number) => (
           <div
-            key={inquiry._id}
-            className={`grid grid-cols-1 md:grid-cols-[1.2fr_1fr_1fr_auto] gap-3 md:gap-4 items-center py-5 ${
-              index !== inquiries.length - 1 ? "border-b border-[#E6E6E8]" : ""
+            key={landlord._id}
+            className={`grid grid-cols-1 md:grid-cols-[1.2fr_1fr_auto] gap-3 md:gap-4 items-center py-5 ${
+              index !== landlords.length - 1 ? "border-b border-[#E6E6E8]" : ""
             }`}
           >
             <p className="text-base leading-normal font-semibold text-[#4c4e50] truncate">
-              {inquiry.firstName} {inquiry.lastName}
+              {landlord.firstName} {landlord.lastName}
             </p>
             <p className="text-sm text-[#68706A] font-normal leading-normal truncate">
-              {inquiry.email}
-            </p>
-            <p className=" text-sm text-[#68706A] font-normal leading-normal truncate">
-              {inquiry.onOfficeId?.objekttitel || "N/A"}
+              {landlord.email}
             </p>
             <p className="text-sm text-[#68706A] font-normal leading-normal whitespace-nowrap">
-              {moment(inquiry.createdAt).format("YYYY-MM-DD")}
+              {moment(landlord.createdAt).format("YYYY-MM-DD")}
             </p>
           </div>
         ))}
@@ -104,10 +97,10 @@ const RecentInquiries = ({ limit = 3 }: RecentInquiriesProps) => {
       <Card className="w-full border border-[#E6E6E8] bg-white">
         <CardHeader className="pb-1 pt-5 px-5 flex flex-row items-center justify-between">
           <CardTitle className="text-lg leading-normal font-semibold text-[#343A40]">
-            Recent Inquiries
+            Recent Landlords
           </CardTitle>
           <Link
-            href="/inquiries-management"
+            href="/landlord-contact"
             className="text-sm font-medium leading-normal text-primary hover:underline"
           >
             See all
@@ -119,4 +112,4 @@ const RecentInquiries = ({ limit = 3 }: RecentInquiriesProps) => {
   );
 };
 
-export default RecentInquiries;
+export default RecentLandlords;

@@ -52,7 +52,7 @@ const SettingSidebar = () => {
             <li className="text-base font-normal text-[#5B6574] leading-[120%] "><strong className="text-base font-semibold leading-[120%] text-[#5B6574]">Name :</strong> {data?.data?.firstName || "N/A"} {data?.data?.lastName || ""}</li>
              <li className="text-base font-normal text-[#5B6574] leading-[120%] pt-3"><strong className="text-base font-semibold leading-[120%] text-[#5B6574]">Bio :</strong> {data?.data?.bio || "N/A"}</li>
             <li className="text-base font-normal text-[#5B6574] leading-[120%] py-3"><strong className="text-base font-semibold leading-[120%] text-[#5B6574]">Email :</strong> {data?.data?.email || "N/A"}</li>
-            <li className="text-base font-normal text-[#5B6574] leading-[120%] "><strong className="text-base font-semibold leading-[120%] text-[#5B6574]">Phone :</strong> {data?.data?.phone || "N/A"}</li>
+            <li className="text-base font-normal text-[#5B6574] leading-[120%] "><strong className="text-base font-semibold leading-[120%] text-[#5B6574]">Phone :</strong> {data?.data?.phoneNumber || "N/A"}</li>
             <li className="text-base font-normal text-[#5B6574] leading-[120%] py-3"><strong className="text-base font-semibold leading-[120%] text-[#5B6574]">Location :</strong> {data?.data?.streetAddress || "N/A"}</li>
           </ul>
         </div>

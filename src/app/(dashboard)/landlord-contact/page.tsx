@@ -1,17 +1,17 @@
 import React from "react";
-import CrmSyncViewContainer from "./_components/crm-sync-view-container";
+import LandlordContactContainer from "./_component/landlord-contact-container";
 import DashboardHeader from "@/components/ui/dashboard-header";
 
-const CrmSyncViewPage = () => {
+const LandlordContactPage = () => {
   return (
     <div>
       <DashboardHeader
-        title="CRM Sync Status Details"
+        title="Landlord Contact  Information"
         desc="Welcome back! Here's what's happening with your app today."
       />
-      <CrmSyncViewContainer />
+      <LandlordContactContainer />
     </div>
   );
 };
 
-export default CrmSyncViewPage;
+export default LandlordContactPage;

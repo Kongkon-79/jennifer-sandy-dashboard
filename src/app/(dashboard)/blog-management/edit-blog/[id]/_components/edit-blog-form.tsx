@@ -7,7 +7,14 @@ import BlogForm from "../../../_components/blog-form";
 import { Skeleton } from "@/components/ui/skeleton";
 import ErrorContainer from "@/components/shared/ErrorContainer/ErrorContainer";
 
-import type { BlogResponse } from "../../../_components/blog-data-type";
+import type { Blog } from "../../../_components/blog-data-type";
+
+interface SingleBlogApiResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: Blog;
+}
 
 type Props = {
   blogId: string;
@@ -17,7 +24,7 @@ const EditBlogForm = ({ blogId }: Props) => {
   const session = useSession();
   const token = (session?.data?.user as { accessToken: string })?.accessToken;
 
-  const { data, isLoading, error, isError } = useQuery<BlogResponse>({
+  const { data, isLoading, error, isError } = useQuery<SingleBlogApiResponse>({
     queryKey: ["blog", blogId],
     queryFn: async () => {
       const res = await fetch(
@@ -67,8 +74,14 @@ const EditBlogForm = ({ blogId }: Props) => {
       mode="edit"
       blogId={blogId}
       initialTitle={blog.title}
-      initialDescription={blog.description}
-      initialImage={blog.thembnail}
+      initialContent={blog.content || blog.description || ""}
+      initialImage={blog.thumbnail}
+      initialExcerpt={blog.excerpt || ""}
+      initialCategory={blog.category || ""}
+      initialTags={blog.tags || []}
+      initialAuthor={blog.author || ""}
+      initialIsPublished={blog.isPublished ?? true}
+      initialPublishedAt={blog.publishedAt || ""}
     />
   );
 };
