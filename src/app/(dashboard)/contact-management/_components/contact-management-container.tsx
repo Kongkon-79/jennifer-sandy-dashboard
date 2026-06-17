@@ -110,7 +110,7 @@ const ContactManagementContainer = () => {
                     {item?.fullName ? item?.fullName : "N/A"}
                   </TableCell>
                   <TableCell className="text-base font-normal text-[#68706A] leading-[150%] text-center py-4">
-                    {item?.phone ? item?.phone : "N/A"}
+                    {item?.phoneNumber ? item?.phoneNumber : "N/A"}
                   </TableCell>
                   <TableCell className="text-base font-normal text-[#68706A] leading-[150%] text-center py-4">
                    <p className="truncate"> {item?.message ? item?.message : "N/A"}</p>

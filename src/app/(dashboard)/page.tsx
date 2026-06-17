@@ -2,7 +2,8 @@ import React from 'react'
 import { DashboardOverview } from './_components/dashboard-overview'
 import DashboardHeader from '@/components/ui/dashboard-header'
 import RecentInquiries from './_components/recent-inquiries'
-import CrmStatusSummary from './_components/crm-status-summary'
+import RecentUsers from './_components/recent-users'
+import RecentLandlords from './_components/recent-landlord'
 
 const DashboardOverviewPage = () => {
   return (
@@ -10,7 +11,8 @@ const DashboardOverviewPage = () => {
       <DashboardHeader title="Dashboard" desc="Welcome back! Here's what's happening with your app today."/>
       <DashboardOverview/>
       <RecentInquiries/>
-      <CrmStatusSummary/>
+      <RecentUsers/>
+      <RecentLandlords/>
     </div>
   )
 }

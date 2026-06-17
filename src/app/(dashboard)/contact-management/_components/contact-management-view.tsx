@@ -25,7 +25,7 @@ const ContactManagementView = ({
             <strong className="text-base font-semibold text-[#1E1E1E] leading-[150%]">Email :</strong> <br/> {contactData?.email}
           </p>
           <p className="text-base font-normal text-[#6C757D)] leading-[150%]">
-            <strong className="text-base font-semibold text-[#1E1E1E] leading-[150%]">Phone Number :</strong> <br/> {contactData?.phone}
+            <strong className="text-base font-semibold text-[#1E1E1E] leading-[150%]">Phone Number :</strong> <br/> {contactData?.phoneNumber}
           </p>
           <p className="text-base font-normal text-[#6C757D)] leading-[150%]">
             <strong className="text-base font-semibold text-[#1E1E1E] leading-[150%]">Messages :</strong> <br/> {contactData?.message}

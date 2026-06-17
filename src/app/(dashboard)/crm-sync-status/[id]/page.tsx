@@ -1,9 +1,17 @@
-import React from 'react'
+import React from "react";
+import CrmSyncViewContainer from "./_components/crm-sync-view-container";
+import DashboardHeader from "@/components/ui/dashboard-header";
 
-const CrmSyncViewpage = () => {
+const CrmSyncViewPage = () => {
   return (
-    <div>CrmSyncViewpage</div>
-  )
-}
+    <div>
+      <DashboardHeader
+        title="CRM Sync Status Details"
+        desc="Welcome back! Here's what's happening with your app today."
+      />
+      <CrmSyncViewContainer />
+    </div>
+  );
+};
 
-export default CrmSyncViewpage
+export default CrmSyncViewPage;
