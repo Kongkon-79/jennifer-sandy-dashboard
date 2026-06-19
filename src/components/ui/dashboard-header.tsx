@@ -21,7 +21,7 @@ const DashboardHeader = ({ title, desc }: DashboardHeaderProps) => {
           </div>
         </div>
 
-        <div className="flex w-full justify-start lg:w-auto lg:justify-end">
+        <div className="flex shrink-0 justify-start lg:justify-end">
           <LanguageSwitcher />
         </div>
       </div>

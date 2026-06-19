@@ -79,17 +79,20 @@ const LanguageSwitcherComponent = () => {
   const languages = config?.languages ?? fallbackLanguages;
 
   return (
-    <div className="notranslate" translate="no">
+    <div className="notranslate inline-flex" translate="no">
       <Select value={currentLang} onValueChange={switchLang}>
-        <SelectTrigger className="h-10 min-w-28 cursor-pointer rounded-xl border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-100 md:min-w-32">
+        <SelectTrigger className="h-10 w-fit min-w-28 cursor-pointer rounded-xl border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-100 md:min-w-32">
           <SelectValue placeholder="Language" />
         </SelectTrigger>
-        <SelectContent sideOffset={12} className="min-w-32">
+        <SelectContent
+          sideOffset={12}
+          className="min-w-32 rounded-lg border-slate-200 bg-white text-slate-700 shadow-md ring-1 ring-slate-900/10"
+        >
           {languages.map((language) => (
             <SelectItem
               key={language.name}
               value={language.name}
-              className="cursor-pointer data-[state=checked]:bg-primary/10 data-[state=checked]:font-semibold data-[state=checked]:text-slate-700 focus:bg-primary/15 focus:text-slate-700"
+              className="cursor-pointer rounded-md py-1 pl-1.5 pr-8 data-[state=checked]:bg-primary/10 data-[state=checked]:font-semibold data-[state=checked]:text-slate-700 focus:bg-primary/15 focus:text-slate-700"
             >
               {language.title}
             </SelectItem>
