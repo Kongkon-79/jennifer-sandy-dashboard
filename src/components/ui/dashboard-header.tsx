@@ -21,7 +21,7 @@ const DashboardHeader = ({ title, desc }: DashboardHeaderProps) => {
           </div>
         </div>
 
-        <div className="w-full rounded-[12px] bg-[#F8F9FA] p-3 lg:w-auto lg:min-w-[260px]">
+        <div className="flex shrink-0 justify-start lg:justify-end">
           <LanguageSwitcher />
         </div>
       </div>

@@ -4,8 +4,16 @@ import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import { parseCookies, setCookie } from 'nookies';
 import { isClient } from '@/lib/client-utils';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 type GoogleTranslationConfig = {
+  sourceLanguage: string;
   defaultLanguage: string;
   languages: { name: string; title: string }[];
 };
@@ -17,6 +25,11 @@ declare global {
 }
 
 const COOKIE_NAME = 'googtrans';
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
+const fallbackLanguages = [
+  { name: 'de', title: 'Deutsch' },
+  { name: 'en', title: 'English' },
+];
 
 const LanguageSwitcherComponent = () => {
   const [currentLang, setCurrentLang] = useState('de');
@@ -50,31 +63,42 @@ const LanguageSwitcherComponent = () => {
   }, []);
 
   const switchLang = (lang: string) => {
-    setCookie(undefined, COOKIE_NAME, `/auto/${lang}`, { path: '/' });
+    const sourceLanguage = config?.sourceLanguage ?? 'en';
+
+    setCookie(undefined, COOKIE_NAME, `/${sourceLanguage}/${lang}`, {
+      maxAge: COOKIE_MAX_AGE,
+      path: '/',
+    });
+
     if (isClient) {
+      document.documentElement.lang = lang;
       window.location.reload();
     }
   };
 
-  if (!config) {
-    return <div className="text-center p-2 text-xs text-gray-400">Laden...</div>;
-  }
+  const languages = config?.languages ?? fallbackLanguages;
 
   return (
-    <div className="flex justify-center gap-3 p-3 flex-wrap bg-white border-t">
-      {config.languages.map((l) => (
-        <button
-          key={l.name}
-          onClick={() => switchLang(l.name)}
-          className={`px-4 py-1.5 rounded text-sm font-medium transition-all ${
-            currentLang === l.name
-              ? 'bg-orange-500 text-white'
-              : 'bg-gray-100 hover:bg-gray-200'
-          }`}
+    <div className="notranslate inline-flex" translate="no">
+      <Select value={currentLang} onValueChange={switchLang}>
+        <SelectTrigger className="h-10 w-fit min-w-28 cursor-pointer rounded-xl border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-100 md:min-w-32">
+          <SelectValue placeholder="Language" />
+        </SelectTrigger>
+        <SelectContent
+          sideOffset={12}
+          className="min-w-32 rounded-lg border-slate-200 bg-white text-slate-700 shadow-md ring-1 ring-slate-900/10"
         >
-          {l.title}
-        </button>
-      ))}
+          {languages.map((language) => (
+            <SelectItem
+              key={language.name}
+              value={language.name}
+              className="cursor-pointer rounded-md py-1 pl-1.5 pr-8 data-[state=checked]:bg-primary/10 data-[state=checked]:font-semibold data-[state=checked]:text-slate-700 focus:bg-primary/15 focus:text-slate-700"
+            >
+              {language.title}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 };
