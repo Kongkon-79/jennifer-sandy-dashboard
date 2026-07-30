@@ -26,6 +26,9 @@ import { signOut } from 'next-auth/react'
 import LogoutModal from '@/components/modals/LogoutModal'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import Image from 'next/image'
+
+import Logo from "../../../../public/assets/images/new-logo.png"
 
 const items = [
   {
@@ -87,15 +90,20 @@ export function DashboardSidebar() {
   return (
     <div>
       <Sidebar className="border-none w-[312px]">
-        <SidebarContent className="bg-[#ECECEC] scrollbar-hide border-r border-[#D9D9D9]">
+        <SidebarContent className="bg-black/90 scrollbar-hide border-r border-[#D9D9D9]">
           <SidebarGroup className="p-0">
             <div className="flex flex-col justify-between min-h-screen pb-6">
               <div>
                 <div className="mt-8 mb-6 flex justify-center">
-                  <Link href={`/`}>
-                    <h1 className="text-[44px] leading-none text-[#1273EA] font-hexco font-semibold">
-                      O211wohnen
-                    </h1>
+                  <Link href="/" className="block">
+                    <Image
+                      src={Logo}
+                      alt="Logo"
+                      width={600}
+                      height={300}
+                      priority
+                      className="h-20 w-[220px] object-cover"
+                    />
                   </Link>
                 </div>
                 <SidebarGroupContent className="px-4 pt-1">
@@ -113,14 +121,16 @@ export function DashboardSidebar() {
                             className={`h-[46px] rounded-[6px] text-[15px] transition-all duration-200 ${
                               isActive
                                 ? 'bg-[#1273EA] hover:bg-[#1273EA] text-white hover:text-white font-semibold'
-                                : 'bg-transparent hover:bg-[#E3E3E3] text-[#777777] hover:text-[#555555] font-medium'
+                                : 'bg-transparent text-[#C5C7CA] hover:bg-white/10 hover:text-white font-medium'
                             }`}
                             asChild
                           >
-                            <Link href={item.url}>
+                            <Link href={item.url} className="group">
                               <item.icon
                                 className={`!w-[18px] !h-[18px] ${
-                                  isActive ? 'text-white' : 'text-[#8A8A8A]'
+                                  isActive
+                                    ? 'text-white'
+                                    : 'text-[#A8ADB3] group-hover:text-white'
                                 }`}
                               />
                               <span>{item.title}</span>

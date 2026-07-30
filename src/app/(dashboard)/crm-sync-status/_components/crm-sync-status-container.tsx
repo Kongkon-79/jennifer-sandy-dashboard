@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Eye, RefreshCcw } from "lucide-react";
+import { AlertCircle, Building2, Eye, RefreshCcw } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 
@@ -34,6 +34,82 @@ interface CrmSyncResponse {
 }
 
 const itemsPerPage = 5;
+
+const TableSkeleton = () => (
+  <>
+    {Array.from({ length: itemsPerPage }).map((_, index) => (
+      <tr key={index} className="border-b border-[#E6E7E6] last:border-b-0">
+        <td className="w-2/5 py-4 pl-6">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 shrink-0 animate-pulse rounded-[6px] bg-[#E6F2FD]" />
+            <div className="h-4 w-40 max-w-[70%] animate-pulse rounded bg-[#E6E6E8]" />
+          </div>
+        </td>
+        {Array.from({ length: 4 }).map((__, cellIndex) => (
+          <td key={cellIndex} className="py-4">
+            <div className="mx-auto h-4 w-16 animate-pulse rounded bg-[#E6E6E8]" />
+          </td>
+        ))}
+        <td className="py-4">
+          <div className="mx-auto h-9 w-[88px] animate-pulse rounded-[4px] bg-[#E6F2FD]" />
+        </td>
+        <td className="py-4">
+          <div className="mx-auto h-5 w-5 animate-pulse rounded bg-[#E6E6E8]" />
+        </td>
+      </tr>
+    ))}
+  </>
+);
+
+interface TableStateProps {
+  onRetry?: () => void;
+}
+
+const TableErrorState = ({ onRetry }: TableStateProps) => (
+  <tr>
+    <td colSpan={7} className="px-6 py-14">
+      <div className="mx-auto flex max-w-md flex-col items-center text-center">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#FDECEF]">
+          <AlertCircle className="h-6 w-6 text-[#FF3B30]" />
+        </div>
+        <h3 className="mt-4 text-base font-semibold text-[#343A40]">
+          Unable to load properties
+        </h3>
+        <p className="mt-1.5 text-sm leading-6 text-[#68706A]">
+          We could not retrieve the CRM property data. Check your connection and
+          try again.
+        </p>
+        <button
+          type="button"
+          onClick={onRetry}
+          className="mt-5 inline-flex h-10 items-center gap-2 rounded-[8px] bg-primary px-4 text-sm font-medium text-white transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2"
+        >
+          <RefreshCcw className="h-4 w-4" />
+          Try Again
+        </button>
+      </div>
+    </td>
+  </tr>
+);
+
+const TableEmptyState = () => (
+  <tr>
+    <td colSpan={7} className="px-6 py-14">
+      <div className="mx-auto flex max-w-md flex-col items-center text-center">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#E6F2FD]">
+          <Building2 className="h-6 w-6 text-primary" />
+        </div>
+        <h3 className="mt-4 text-base font-semibold text-[#343A40]">
+          No properties found
+        </h3>
+        <p className="mt-1.5 text-sm leading-6 text-[#68706A]">
+          There are no synced CRM properties to display yet. Start a sync to
+          import your latest listings.
+        </p>
+      </div>
+    </td>
+  </tr>
+);
 
 const formatSyncDate = (syncedAt: string): string => {
   const date = new Date(syncedAt);
@@ -98,7 +174,8 @@ const CrmSyncStatusContainer = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [syncItems, setSyncItems] = useState<CrmSyncStatusItem[]>([]);
-  const [isLoadingEstates, setIsLoadingEstates] = useState(false);
+  const [isLoadingEstates, setIsLoadingEstates] = useState(true);
+  const [estatesError, setEstatesError] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [syncModalOpen, setSyncModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<CrmSyncStatusItem | null>(
@@ -145,6 +222,7 @@ const CrmSyncStatusContainer = () => {
     if (!token) return;
 
     setIsLoadingEstates(true);
+    setEstatesError(false);
     try {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/onoffice/estates?limit=1000`,
@@ -156,14 +234,21 @@ const CrmSyncStatusContainer = () => {
         }
       );
 
+      if (!res.ok) {
+        throw new Error(`Estate request failed with status ${res.status}`);
+      }
+
       const response: EstatesApiResponse = await res.json();
 
       if (response.success && Array.isArray(response.data)) {
         const mappedItems = response.data.map(mapEstateToSyncItem);
         setSyncItems(mappedItems);
+      } else {
+        throw new Error("Estate response did not contain valid data");
       }
     } catch (error) {
       console.error("Estates fetch error:", error);
+      setEstatesError(true);
       toast.error("Failed to load estate data.");
     } finally {
       setIsLoadingEstates(false);
@@ -373,17 +458,11 @@ const CrmSyncStatusContainer = () => {
 
               <tbody className="border-b border-x border-[#E6E7E6]">
                 {isLoadingEstates ? (
-                  <tr>
-                    <td colSpan={7} className="py-8 text-center text-base font-normal text-[#68706A]">
-                      Loading estate data...
-                    </td>
-                  </tr>
+                  <TableSkeleton />
+                ) : estatesError ? (
+                  <TableErrorState onRetry={fetchEstates} />
                 ) : paginatedItems.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="py-8 text-center text-base font-normal text-[#68706A]">
-                      No data available.
-                    </td>
-                  </tr>
+                  <TableEmptyState />
                 ) : (
                   paginatedItems.map((item, index) => (
                     <tr
@@ -461,7 +540,7 @@ const CrmSyncStatusContainer = () => {
           </div>
         </div>
 
-        {syncItems.length > 0 && (
+        {!isLoadingEstates && !estatesError && syncItems.length > 0 && (
           <div className="mt-6 flex flex-col gap-4 px-1 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm font-normal leading-[150%] text-[#68706A]">
               Showing {showingStart} to {showingEnd} of {syncItems.length} results
