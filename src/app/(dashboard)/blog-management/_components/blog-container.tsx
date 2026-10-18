@@ -46,7 +46,7 @@ const BlogContainer = () => {
     queryKey: ["blog-management", currentPage],
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/blog?page=${currentPage}&limit=${ITEMS_PER_PAGE}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/blog/admin?page=${currentPage}&limit=${ITEMS_PER_PAGE}`,
         {
           method: "GET",
           headers: {

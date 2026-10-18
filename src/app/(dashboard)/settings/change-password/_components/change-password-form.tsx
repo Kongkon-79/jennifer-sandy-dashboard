@@ -16,7 +16,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -69,13 +69,13 @@ const ChangePasswordForm = () => {
       }
       toast.success(data?.message || "Password Change successfully!");
       form.reset();
+      void signOut({ callbackUrl: "/login" });
     },
   });
 
 
   // 2. Define a submit handler.
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
         const payload = {
       oldPassword: values?.oldPassword,
       newPassword: values?.newPassword,

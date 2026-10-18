@@ -82,6 +82,12 @@ export default function OtpForm() {
         toast.error(data?.message || "Something went wrong");
         return;
       } else {
+        const resetToken = data?.data?.resetToken;
+        if (typeof resetToken !== "string" || !resetToken) {
+          toast.error("Please request a new password reset code.");
+          return;
+        }
+        sessionStorage.setItem(`password-reset:${decodedEmail}`, resetToken);
         toast.success(data?.message || "Email sent successfully!");
         router.push(
           `/forgot-password/otp/reset-password?email=${encodeURIComponent(decodedEmail)}`
@@ -130,6 +136,7 @@ export default function OtpForm() {
 
   // handle resend otp
   const handleResendOtp = async () => {
+    sessionStorage.removeItem(`password-reset:${decodedEmail}`);
     resentOtp(decodedEmail);
   };
 
@@ -144,7 +151,6 @@ export default function OtpForm() {
     }
     mutate({ otp: otpValue, email: decodedEmail });
 
-    console.log("OTP Verified:", otpValue);
   };
 
   return (

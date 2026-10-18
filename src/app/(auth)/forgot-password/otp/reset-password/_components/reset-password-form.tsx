@@ -57,7 +57,7 @@ const ResetPasswordForm = () => {
 
   const {mutate, isPending} = useMutation({
     mutationKey: ["reset-password"],
-    mutationFn : async (values: {email:string, newPassword:string})=>{
+    mutationFn : async (values: {email:string, newPassword:string, resetToken:string})=>{
       const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/reset-password`,{
         method: "POST",
         headers: {
@@ -72,6 +72,7 @@ const ResetPasswordForm = () => {
         toast.error(data?.message || "Something went wrong");
         return
       }else{
+        sessionStorage.removeItem(`password-reset:${decodedEmail}`);
         toast.success(data?.message || "Password reset successfully");
         router.push("/login")
       }
@@ -79,9 +80,16 @@ const ResetPasswordForm = () => {
   })
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    const resetToken = sessionStorage.getItem(`password-reset:${decodedEmail}`);
+    if (!resetToken) {
+      toast.error("Please verify a new password reset code first.");
+      router.push(`/forgot-password/otp?email=${encodeURIComponent(decodedEmail)}`);
+      return;
+    }
     const payload ={
       email: decodedEmail,
-      newPassword: values?.password
+      newPassword: values?.password,
+      resetToken,
     }
     mutate(payload)
   }

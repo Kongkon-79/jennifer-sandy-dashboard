@@ -29,7 +29,8 @@ interface CrmSyncResponse {
     synced: number;
     errors: number;
     deactivated: number;
-    syncedAt: string;
+    syncedAt: string | null;
+    syncInProgress?: boolean;
   };
 }
 
@@ -111,8 +112,10 @@ const TableEmptyState = () => (
   </tr>
 );
 
-const formatSyncDate = (syncedAt: string): string => {
+const formatSyncDate = (syncedAt: string | null): string => {
+  if (!syncedAt) return "—";
   const date = new Date(syncedAt);
+  if (Number.isNaN(date.getTime())) return "—";
   const options: Intl.DateTimeFormatOptions = {
     year: "numeric",
     month: "long",
@@ -160,8 +163,8 @@ const mapEstateToSyncItem = (estate: EstateItem): CrmSyncStatusItem => ({
   apartmentName: estate.objekttitel,
   date: formatDateShort(estate.syncedAt),
   time: formatTimeShort(estate.syncedAt),
-  updatedListings: estate.wohnflaeche,
-  errors: 0,
+  livingArea: estate.wohnflaeche,
+  rentalStatus: estate.rentalStatusLabel || "Not specified",
   status: estate.isActive ? "success" : "failed",
   thumbnail: getThumbnailUrl(estate),
   slug: estate.slug,
@@ -193,9 +196,9 @@ const CrmSyncStatusContainer = () => {
     setIsLoadingSyncStatus(true);
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/crm/sync/onoffice`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/crm/sync/status`,
         {
-          method: "POST",
+          method: "GET",
           headers: {
             accept: "*/*",
             Authorization: `Bearer ${token}`,
@@ -203,6 +206,7 @@ const CrmSyncStatusContainer = () => {
         }
       );
 
+      if (!res.ok) throw new Error(`CRM status request failed with status ${res.status}`);
       const response: CrmSyncResponse = await res.json();
 
       setIsConnected(response.success);
@@ -302,7 +306,7 @@ const CrmSyncStatusContainer = () => {
 
       const response: CrmSyncResponse = await res.json();
 
-      if (response?.success) {
+      if (res.ok && response?.success) {
         // Update stat cards immediately from sync response
         setIsConnected(true);
         if (response.data) {
@@ -442,13 +446,13 @@ const CrmSyncStatusContainer = () => {
                     Time
                   </th>
                   <th className="py-4 text-center text-sm font-normal leading-[150%] text-[#343A40]">
-                    Updated Listings
+                    Living Area (m²)
                   </th>
                   <th className="py-4 text-center text-sm font-normal leading-[150%] text-[#343A40]">
-                    Errors
+                    Rental Status
                   </th>
                   <th className="py-4 text-center text-sm font-normal leading-[150%] text-[#343A40]">
-                    Status
+                    Publication
                   </th>
                   <th className="py-4 text-center text-sm font-normal leading-[150%] text-[#343A40]">
                     Action
@@ -503,10 +507,10 @@ const CrmSyncStatusContainer = () => {
                         {item.time}
                       </td>
                       <td className="py-4 text-center text-base font-normal leading-[150%] text-[#68706A]">
-                        {item.updatedListings}
+                        {item.livingArea || "—"}
                       </td>
                       <td className="py-4 text-center text-base font-normal leading-[150%] text-[#68706A]">
-                        {item.errors}
+                        {item.rentalStatus}
                       </td>
                       <td className="py-4 text-center align-middle">
                         <span
@@ -517,7 +521,7 @@ const CrmSyncStatusContainer = () => {
                               : "bg-[#FDECEF] text-[#FF3B30]",
                           )}
                         >
-                          {item.status === "success" ? "Success" : "Failed"}
+                          {item.status === "success" ? "Published" : "Inactive"}
                         </span>
                       </td>
                       <td className="py-4 text-center align-middle">

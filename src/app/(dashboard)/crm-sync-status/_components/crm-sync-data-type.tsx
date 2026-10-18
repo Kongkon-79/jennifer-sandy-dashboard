@@ -4,8 +4,8 @@ export type CrmSyncStatusItem = {
   apartmentName: string;
   date: string;
   time: string;
-  updatedListings: number;
-  errors: number;
+  livingArea: number;
+  rentalStatus: string;
   status: "success" | "failed";
   thumbnail: string;
   slug: string;
@@ -43,6 +43,17 @@ export interface EstateItem {
   anzahl_schlafzimmer: number;
   anzahl_badezimmer: number;
   moebliert: string;
+  objektbeschreibung?: string;
+  lage?: string;
+  ausstatt_beschr?: string;
+  verfuegbar_ab?: string | null;
+  verfuegbarAbText?: string;
+  rentalStatusLabel?: string;
+  price?: number | null;
+  priceType?: string;
+  priceLabel?: string;
+  amenities?: Record<string, boolean>;
+  whyChoose?: string[];
 }
 
 export interface EstatesApiResponse {

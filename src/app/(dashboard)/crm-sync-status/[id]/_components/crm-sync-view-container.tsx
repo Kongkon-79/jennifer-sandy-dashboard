@@ -21,13 +21,18 @@ import type {
 } from "../../_components/crm-sync-data-type";
 import crmImage from "../../../../../../public/assets/images/crm.jpg";
 
-const formatSyncDate = (syncedAt: string): string => {
-  const date = new Date(syncedAt);
-  return date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+const availabilityText = (estate: EstateItem) => {
+  if (estate.verfuegbarAbText) return estate.verfuegbarAbText;
+  if (!estate.verfuegbar_ab) return "Availability on request";
+  const date = new Date(estate.verfuegbar_ab);
+  return Number.isNaN(date.getTime()) ? "Availability on request" : `Available from ${date.toLocaleDateString("de-DE", { timeZone: "Europe/Berlin" })}`;
+};
+
+const amenityLabels: Record<string, string> = {
+  furnished: "Furnished", transportationParking: "Transportation & parking", wifi: "Wi-Fi",
+  elevator: "Elevator", fittedKitchen: "Fitted kitchen", emergencyAlertSystem: "Emergency alert system",
+  moveInCoordination: "Move-in coordination", mealPreparationService: "Meal preparation and service",
+  petFriendly: "Pet-friendly", balcony: "Balcony",
 };
 
 const CrmSyncViewContainer = () => {
@@ -56,6 +61,7 @@ const CrmSyncViewContainer = () => {
         { method: "GET", headers: { accept: "*/*" } }
       );
 
+      if (!res.ok) throw new Error(`Estate request failed with status ${res.status}`);
       const response: EstatesApiResponse = await res.json();
 
       if (response.success && Array.isArray(response.data)) {
@@ -212,7 +218,7 @@ const CrmSyncViewContainer = () => {
             <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
               <div>
                 <h1 className="text-xl font-semibold leading-tight text-[#1E3A8A]">
-                  {estate.objekttitel || "Skyline Luxury Apartments"}
+                  {estate.objekttitel || "Property"}
                 </h1>
                 {(estate.ort || estate.strasse) && (
                   <p className="mt-4 flex items-center gap-3 text-lg text-gray-600">
@@ -254,12 +260,9 @@ const CrmSyncViewContainer = () => {
                   <strong>{estate.anzahl_zimmer} Rooms</strong>
                 </span>
               )}
-              <span>
-                <strong>Balcony</strong>
-              </span>
-              {estate.syncedAt && (
-                <span>Available from {formatSyncDate(estate.syncedAt)}</span>
-              )}
+              {estate.amenities?.balcony && <span><strong>Balcony</strong></span>}
+              <span>{availabilityText(estate)}</span>
+              {estate.rentalStatusLabel && <span>{estate.rentalStatusLabel}</span>}
             </div>
           </div>
 
@@ -267,8 +270,8 @@ const CrmSyncViewContainer = () => {
             <h2 className="mb-5 text-2xl font-semibold text-gray-900">
               Description
             </h2>
-            <p className="text-[17px] leading-relaxed text-gray-600">
-              {`A beautiful ${estate.objekttitel || "property"} located in ${estate.ort || "a prime location"}. ${estate.anzahl_zimmer ? `This property features ${estate.anzahl_zimmer} rooms` : ""} ${estate.wohnflaeche ? `with a living area of ${estate.wohnflaeche} m².` : "."}`}
+            <p className="whitespace-pre-line text-[17px] leading-relaxed text-gray-600">
+              {estate.objektbeschreibung || "No property description has been provided."}
             </p>
           </div>
 
@@ -278,58 +281,32 @@ const CrmSyncViewContainer = () => {
             </h2>
             <div className="grid grid-cols-1 gap-x-12 gap-y-6 md:grid-cols-2">
               <div className="space-y-6">
-                {[
-                  "Furnished",
-                  "Transportation & parking",
-                  "Wi-Fi",
-                  "Elevator",
-                  "Fitted Kitchen",
-                ].map((item, i) => (
-                  <div key={i} className="flex gap-4">
+                {Object.entries(estate.amenities || {}).filter(([key, enabled]) => enabled === true && amenityLabels[key]).map(([key]) => (
+                  <div key={key} className="flex gap-4">
                     <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-blue-50">
                       <CheckCircle2 className="h-5 w-5 text-blue-600" />
                     </div>
-                    <p className="pt-1 font-medium">{item}</p>
+                    <p className="pt-1 font-medium">{amenityLabels[key]}</p>
                   </div>
                 ))}
               </div>
-              <div className="space-y-6">
-                {[
-                  "Emergency Alert System",
-                  "Move-in coordination",
-                  "Meal preparation and service",
-                  "Pet-friendly",
-                  "24/7 Security",
-                ].map((item, i) => (
-                  <div key={i} className="flex gap-4">
-                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-blue-50">
-                      <CheckCircle2 className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <p className="pt-1 font-medium">{item}</p>
-                  </div>
-                ))}
-              </div>
+              {!Object.values(estate.amenities || {}).some((enabled) => enabled === true) && <p className="text-gray-600">No confirmed amenities have been provided.</p>}
             </div>
           </div>
 
-          <div className="rounded-3xl bg-white p-8 shadow">
+          {Boolean(estate.whyChoose?.length) && <div className="rounded-3xl bg-white p-8 shadow">
             <h2 className="mb-6 text-2xl font-semibold text-gray-900">
-              Why Choose Skyline Luxury Apartments?
+              Property highlights
             </h2>
             <ul className="space-y-4 text-gray-600">
-              {[
-                "Comfortable living space – modern rooms and cozy common areas designed for relaxation",
-                "Personalized Care Plans – Tailored assistance to meet individual health and lifestyle needs",
-                "Engaging Activities – Social, cultural, and recreational programs that keep residents active and happy",
-                "24/7 Safety & Support – Secure environment with round-the-clock professional staff",
-              ].map((text, i) => (
+              {estate.whyChoose?.map((text, i) => (
                 <li key={i} className="flex gap-3">
                   <CheckCircle2 className="mt-0.5 h-6 w-6 flex-shrink-0 text-blue-600" />
                   {text}
                 </li>
               ))}
             </ul>
-          </div>
+          </div>}
         </div>
       </div>
 

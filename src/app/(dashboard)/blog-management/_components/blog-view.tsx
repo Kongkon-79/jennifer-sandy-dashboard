@@ -5,6 +5,8 @@ import moment from "moment";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import type { Blog } from "./blog-data-type";
+import { useEffect, useState } from "react";
+import { sanitizeBlogHtml } from "@/lib/blog-html";
 
 const BlogView = ({
   open,
@@ -15,10 +17,12 @@ const BlogView = ({
   onOpenChange: (open: boolean) => void;
   blogData: Blog | null;
 }) => {
+  const content = blogData?.content || blogData?.description || "";
+  const [safeContent, setSafeContent] = useState("");
+  useEffect(() => {
+    setSafeContent(sanitizeBlogHtml(content));
+  }, [content]);
   if (!blogData) return null;
-
-
-  console.log("BlogView render with data:", blogData);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -100,7 +104,7 @@ const BlogView = ({
           {/* Content (HTML content) */}
           <div
             className="text-[#343A40] leading-[170%] break-words overflow-wrap-break-word [&_h1]:text-2xl [&_h1]:font-semibold [&_h1]:mb-3 [&_h1]:mt-4 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:mb-3 [&_h2]:mt-3 [&_h3]:text-lg [&_h3]:font-medium [&_h3]:mb-2 [&_h3]:mt-2 [&_p]:text-base [&_p]:text-[#343A40] [&_p]:leading-[170%] [&_p]:mb-3 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-[8px] [&_img]:my-4 [&_a]:text-primary [&_a]:underline [&_a]:break-all [&_ul]:mb-3 [&_ol]:mb-3 [&_ul>li]:ml-5 [&_ol>li]:ml-5 [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_pre]:bg-[#F8F9FA] [&_pre]:p-4 [&_pre]:rounded-[8px] [&_pre]:overflow-x-auto [&_code]:break-words [&_table]:w-full [&_table]:border-collapse [&_td]:border [&_td]:border-[#D9D9D9] [&_td]:p-3 [&_th]:border [&_th]:border-[#D9D9D9] [&_th]:p-3 [&_blockquote]:border-l-4 [&_blockquote]:border-primary [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-[#6C757D] [&_blockquote]:my-4"
-            dangerouslySetInnerHTML={{ __html: blogData.content || blogData.description || "" }}
+            dangerouslySetInnerHTML={{ __html: safeContent }}
           />
         </div>
       </DialogContent>

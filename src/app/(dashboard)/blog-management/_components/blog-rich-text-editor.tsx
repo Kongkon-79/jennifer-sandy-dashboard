@@ -7,6 +7,7 @@ import {
   type ChangeEvent,
   type PointerEvent as ReactPointerEvent,
   type MouseEvent,
+  type ClipboardEvent,
 } from "react";
 import {
   AlignCenter,
@@ -27,6 +28,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { sanitizeBlogHtml } from "@/lib/blog-html";
 import {
   Select,
   SelectContent,
@@ -95,16 +97,28 @@ const BlogRichTextEditor = ({
       return;
     }
 
-    editorRef.current.innerHTML = initialValue;
-    setHasContent(!isContentEmpty(initialValue));
-    onChange?.(initialValue);
+    const safeHtml = sanitizeBlogHtml(initialValue);
+    editorRef.current.innerHTML = safeHtml;
+    setHasContent(!isContentEmpty(safeHtml));
+    onChange?.(safeHtml);
     hasAppliedInitialValueRef.current = true;
   }, [initialValue, onChange]);
 
   const syncEditorValue = () => {
     const html = editorRef.current?.innerHTML ?? "";
     setHasContent(!isContentEmpty(html));
-    onChange?.(html);
+    onChange?.(sanitizeBlogHtml(html));
+  };
+
+  const handlePaste = (event: ClipboardEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const html = event.clipboardData.getData("text/html");
+    if (html) {
+      document.execCommand("insertHTML", false, sanitizeBlogHtml(html));
+    } else {
+      document.execCommand("insertText", false, event.clipboardData.getData("text/plain"));
+    }
+    syncEditorValue();
   };
 
   const saveSelection = () => {
@@ -153,6 +167,13 @@ const BlogRichTextEditor = ({
       return;
     }
 
+    try {
+      const parsed = new URL(url, window.location.origin);
+      if (!["http:", "https:", "mailto:", "tel:"].includes(parsed.protocol)) return;
+    } catch {
+      return;
+    }
+
     runCommand("createLink", url);
   };
 
@@ -176,7 +197,7 @@ const BlogRichTextEditor = ({
         />
       `;
 
-      document.execCommand("insertHTML", false, imageMarkup);
+      document.execCommand("insertHTML", false, sanitizeBlogHtml(imageMarkup));
       syncEditorValue();
     };
 
@@ -556,6 +577,8 @@ const BlogRichTextEditor = ({
             "[&_table]:w-full [&_table]:border-collapse [&_td]:border [&_td]:border-[#D9D9D9] [&_td]:p-2 [&_th]:border [&_th]:border-[#D9D9D9] [&_th]:p-2"
           )}
           onInput={syncEditorValue}
+          onPaste={handlePaste}
+          onDrop={(event) => event.preventDefault()}
           onMouseUp={saveSelection}
           onKeyUp={saveSelection}
           onBlur={saveSelection}
