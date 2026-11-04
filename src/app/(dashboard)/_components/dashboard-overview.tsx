@@ -17,6 +17,7 @@ export interface DashboardOverview {
   activeUser: number;
   suspended: number;
   totalApartment: number;
+  activeApartment: number;
   newEnquiry: number;
   blogpost: number;
 }
@@ -43,8 +44,6 @@ export function DashboardOverview() {
       enabled: !!token,
     });
 
-  console.log(data);
-
   let content;
 
   if (isLoading) {
@@ -65,7 +64,7 @@ export function DashboardOverview() {
         <div className="md:col-span-1 h-[128px] flex items-center justify-between bg-white border border-[#E6E7E6] shadow-[0px_4px_6px_0px_rgba(0,0,0,0.1)]  px-4 rounded-[10px]">
           <div>
             <p className="text-base md:text-lg leading-[150%] font-medium text-[#8E938F]">
-              Total Apartments
+              Synced Properties
             </p>
             <p className="text-2xl md:text-[28px] lg:text-[32px] leading-[150%] text-primary font-bold pt-2">
               {data?.data?.totalApartment || 0}
@@ -81,10 +80,10 @@ export function DashboardOverview() {
         <div className="md:col-span-1 h-[128px] flex items-center justify-between bg-white border border-[#E6E7E6] shadow-[0px_4px_6px_0px_rgba(0,0,0,0.1)]  px-4 rounded-[10px]">
           <div>
             <p className="text-base md:text-lg leading-[150%] font-medium text-[#8E938F]">
-              Active Listings
+              Available Listings
             </p>
             <p className="text-2xl md:text-[28px] lg:text-[32px] leading-[150%] text-primary font-bold pt-2">
-              {data?.data?.activeUser || 0}
+              {data?.data?.activeApartment || 0}
             </p>
           </div>
           <div>

@@ -24,6 +24,14 @@ import {
   AllInquiryApiResponse,
 } from "./inquiries-management-data-type";
 import moment from "moment";
+import InquiryResponseModal from "./inquiry-response-modal";
+
+const statusOptions = [
+  { value: "new", label: "Active" },
+  { value: "in_progress", label: "In Progress" },
+  { value: "responded", label: "Responded" },
+  { value: "closed", label: "Closed" },
+];
 
 const InquiriesManagementContainer = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -33,7 +41,28 @@ const InquiriesManagementContainer = () => {
   const token = (session?.data?.user as { accessToken: string })?.accessToken;
   const [selectedContact, setSelectedContact] = useState<Inquiry | null>(null);
   const [selectedContactId, setSelectedContactId] = useState("");
+  const [responseInquiry, setResponseInquiry] = useState<Inquiry | null>(null);
   const queryClient = useQueryClient();
+
+  const statusMutation = useMutation({
+    mutationFn: async ({ id, status, responseMessage }: { id: string; status: string; responseMessage?: string }) => {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/inquiry/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ status, ...(responseMessage ? { responseMessage } : {}) }),
+      });
+      const body = await res.json();
+      if (!res.ok || !body?.success) throw new Error(body?.message || "Status update failed");
+      return body;
+    },
+    onSuccess: () => {
+      toast.success("Inquiry status updated");
+      setResponseInquiry(null);
+      queryClient.invalidateQueries({ queryKey: ["inquiry-management"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-overview"] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
 
   const { data, isLoading, error, isError } = useQuery<AllInquiryApiResponse>({
     queryKey: ["inquiry-management", currentPage],
@@ -138,15 +167,22 @@ const InquiriesManagementContainer = () => {
                   {moment(item?.createdAt).format("MMM DD YYYY")}
                 </TableCell>
                 <TableCell className="w-[400px] text-base font-normal text-[#68706A] leading-[150%] text-center py-4">
-                  {item?.status === "active" ? (
-                    <span className="px-8 py-2 text-primary text-base font-medium leading-[150%] bg-[#E6F2FD]">
-                      Active
-                    </span>
-                  ) : (
-                    <span className="px-8 py-2 text-[#DEA400] text-base font-medium leading-[150%] bg-[#FEF8E6]">
-                      Inactive
-                    </span>
-                  )}
+                  <select
+                    value={item.status || "new"}
+                    disabled={statusMutation.isPending}
+                    onChange={(event) => {
+                      const status = event.target.value;
+                      if (status === "responded") {
+                        setResponseInquiry(item);
+                        return;
+                      }
+                      statusMutation.mutate({ id: item._id, status });
+                    }}
+                    className="rounded-md border border-[#d9d3ca] bg-[#f5f3ef] px-4 py-2 text-sm font-semibold text-[#262626] outline-none focus:ring-2 focus:ring-[#b5aa9a]"
+                    aria-label="Inquiry status"
+                  >
+                    {statusOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+                  </select>
                 </TableCell>
                 <TableCell className="h-full flex items-center justify-center gap-6 py-4">
                   <button
@@ -252,6 +288,20 @@ const InquiriesManagementContainer = () => {
             />
           )}
         </div>
+
+        <InquiryResponseModal
+          inquiry={responseInquiry}
+          open={Boolean(responseInquiry)}
+          isSending={statusMutation.isPending}
+          onOpenChange={(open) => {
+            if (!open) setResponseInquiry(null);
+          }}
+          onSend={(responseMessage) => {
+            if (responseInquiry) {
+              statusMutation.mutate({ id: responseInquiry._id, status: "responded", responseMessage });
+            }
+          }}
+        />
       </div>
     </div>
   );

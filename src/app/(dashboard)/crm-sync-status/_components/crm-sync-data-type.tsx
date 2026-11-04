@@ -24,6 +24,7 @@ export interface EstateItem {
   objekttitel: string;
   slug: string;
   isActive: boolean;
+  isManuallyHidden?: boolean;
   wohnflaeche: number;
   syncedAt: string;
   titleImage: EstateImage | null;
@@ -54,6 +55,13 @@ export interface EstateItem {
   priceLabel?: string;
   amenities?: Record<string, boolean>;
   whyChoose?: string[];
+  miete_pauschal?: number;
+  mietePauschalProLabel?: string;
+  nebenkosten?: number;
+  status2Label?: string;
+  showGoogleMap?: boolean;
+  breitengrad?: number | null;
+  laengengrad?: number | null;
 }
 
 export interface EstatesApiResponse {

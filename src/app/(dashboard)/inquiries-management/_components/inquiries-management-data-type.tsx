@@ -25,6 +25,8 @@ export interface Inquiry {
   message: string;
   createdAt: string;
   status: string;
+  responseMessage?: string;
+  respondedAt?: string;
   updatedAt: string;
   __v: number;
 }

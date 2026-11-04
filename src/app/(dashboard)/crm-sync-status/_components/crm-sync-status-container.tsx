@@ -165,7 +165,7 @@ const mapEstateToSyncItem = (estate: EstateItem): CrmSyncStatusItem => ({
   time: formatTimeShort(estate.syncedAt),
   livingArea: estate.wohnflaeche,
   rentalStatus: estate.rentalStatusLabel || "Not specified",
-  status: estate.isActive ? "success" : "failed",
+  status: estate.isActive && !estate.isManuallyHidden ? "success" : "failed",
   thumbnail: getThumbnailUrl(estate),
   slug: estate.slug,
 });
@@ -229,11 +229,12 @@ const CrmSyncStatusContainer = () => {
     setEstatesError(false);
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/onoffice/estates?limit=1000`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/onoffice/admin/estates`,
         {
           method: "GET",
           headers: {
             accept: "*/*",
+            Authorization: `Bearer ${token}`,
           },
         }
       );

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
-import { ArrowLeft, MapPin, CheckCircle2, XCircle, AlertCircle, Loader2, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, MapPin, CheckCircle2, XCircle, AlertCircle, Loader2, X, ChevronLeft, ChevronRight, Eye, EyeOff } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import {
@@ -17,9 +17,9 @@ import {
 import type {
   EstateImage,
   EstateItem,
-  EstatesApiResponse,
 } from "../../_components/crm-sync-data-type";
 import crmImage from "../../../../../../public/assets/images/crm.jpg";
+import { toast } from "sonner";
 
 const availabilityText = (estate: EstateItem) => {
   if (estate.verfuegbarAbText) return estate.verfuegbarAbText;
@@ -48,6 +48,7 @@ const CrmSyncViewContainer = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [thumbnailApi, setThumbnailApi] = useState<CarouselApi>();
+  const [isUpdatingVisibility, setIsUpdatingVisibility] = useState(false);
 
   const fetchEstateDetails = useCallback(async () => {
     if (!token || !id) return;
@@ -57,20 +58,14 @@ const CrmSyncViewContainer = () => {
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/onoffice/estates?limit=1000`,
-        { method: "GET", headers: { accept: "*/*" } }
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/onoffice/admin/estates/${id}`,
+        { method: "GET", headers: { accept: "*/*", Authorization: `Bearer ${token}` } }
       );
 
       if (!res.ok) throw new Error(`Estate request failed with status ${res.status}`);
-      const response: EstatesApiResponse = await res.json();
-
-      if (response.success && Array.isArray(response.data)) {
-        const found = response.data.find((item) => item._id === id || item.slug === id);
-        if (found) setEstate(found);
-        else setError("Estate not found.");
-      } else {
-        setError("Failed to load estate data.");
-      }
+      const response = await res.json();
+      if (response.success && response.data) setEstate(response.data);
+      else setError("Failed to load estate data.");
     } catch (err) {
       console.error("Estate fetch error:", err);
       setError("An error occurred while loading estate details.");
@@ -78,6 +73,26 @@ const CrmSyncViewContainer = () => {
       setIsLoading(false);
     }
   }, [token, id]);
+
+  const toggleVisibility = async () => {
+    if (!estate || !token) return;
+    setIsUpdatingVisibility(true);
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/onoffice/estates/${estate._id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ isManuallyHidden: !estate.isManuallyHidden }),
+      });
+      const body = await res.json();
+      if (!res.ok || !body.success) throw new Error(body.message || "Visibility update failed");
+      setEstate(body.data);
+      toast.success(body.data.isManuallyHidden ? "Property hidden from website" : "Property published on website");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Visibility update failed");
+    } finally {
+      setIsUpdatingVisibility(false);
+    }
+  };
 
   useEffect(() => {
     fetchEstateDetails();
@@ -239,13 +254,17 @@ const CrmSyncViewContainer = () => {
                       : "bg-red-100 text-red-700"
                   )}
                 >
-                  {estate.isActive ? (
+                  {estate.isActive && !estate.isManuallyHidden ? (
                     <CheckCircle2 className="h-5 w-5" />
                   ) : (
                     <XCircle className="h-5 w-5" />
                   )}
-                  {estate.isActive ? "Active" : "Inactive"}
+                  {estate.isActive && !estate.isManuallyHidden ? "Visible on website" : "Hidden from website"}
                 </span>
+                <button type="button" onClick={toggleVisibility} disabled={isUpdatingVisibility || !estate.isActive} className="mt-3 flex items-center gap-2 rounded-lg bg-[#d1c9be] px-4 py-2 text-sm font-semibold text-[#262626] disabled:cursor-not-allowed disabled:opacity-50">
+                  {estate.isManuallyHidden ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                  {isUpdatingVisibility ? "Updating..." : estate.isManuallyHidden ? "Publish on website" : "Hide from website"}
+                </button>
               </div>
             </div>
 
@@ -264,7 +283,28 @@ const CrmSyncViewContainer = () => {
               <span>{availabilityText(estate)}</span>
               {estate.rentalStatusLabel && <span>{estate.rentalStatusLabel}</span>}
             </div>
+            <div className="mt-8 grid gap-4 border-t border-gray-100 pt-6 sm:grid-cols-2 lg:grid-cols-4">
+              {[
+                ["onOffice ID", estate.onofficeId],
+                ["Price", estate.priceLabel || estate.price || "—"],
+                ["All-inclusive rent", estate.miete_pauschal || "—"],
+                ["Cold rent", estate.kaltmiete || "—"],
+                ["Warm rent", estate.warmmiete || "—"],
+                ["Purchase price", estate.kaufpreis || "—"],
+                ["Deposit", estate.kaution || "—"],
+                ["Additional costs", estate.nebenkosten || "—"],
+                ["Marketing", estate.vermarktungsart || "—"],
+                ["Property type", estate.objekttyp || estate.objektart || "—"],
+                ["CRM status", estate.status2Label || "—"],
+                ["Map permission", estate.showGoogleMap ? "Allowed" : "Not allowed"],
+              ].map(([label, value]) => <div key={String(label)} className="rounded-xl bg-[#f5f3ef] p-4"><p className="text-xs uppercase tracking-wide text-[#8b8175]">{label}</p><p className="mt-1 font-semibold text-[#262626]">{String(value)}</p></div>)}
+            </div>
           </div>
+
+          {(estate.lage || estate.ausstatt_beschr) && <div className="mb-10 grid gap-6 md:grid-cols-2">
+            {estate.lage && <section className="rounded-3xl bg-white p-8 shadow"><h2 className="mb-4 text-2xl font-semibold">Location</h2><p className="whitespace-pre-line leading-7 text-gray-600">{estate.lage}</p></section>}
+            {estate.ausstatt_beschr && <section className="rounded-3xl bg-white p-8 shadow"><h2 className="mb-4 text-2xl font-semibold">Furnishing</h2><p className="whitespace-pre-line leading-7 text-gray-600">{estate.ausstatt_beschr}</p></section>}
+          </div>}
 
           <div className="mb-10 rounded-3xl bg-white p-8 shadow">
             <h2 className="mb-5 text-2xl font-semibold text-gray-900">

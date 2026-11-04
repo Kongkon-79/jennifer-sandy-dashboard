@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:security": "node --test tests/blog-html.test.cjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

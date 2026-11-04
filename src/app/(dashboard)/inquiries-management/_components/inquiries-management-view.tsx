@@ -60,6 +60,12 @@ const InquiriesManagementView = ({
             </strong>
             <br /> {contactData?.status}
           </p>
+          {contactData.responseMessage && (
+            <p className="rounded-lg bg-[#f5f3ef] p-4 text-base font-normal text-[#6C757D] leading-[150%]">
+              <strong className="font-semibold text-[#1E1E1E]">Response sent:</strong>
+              <br /> {contactData.responseMessage}
+            </p>
+          )}
           <p className="text-base font-normal text-[#7D7D7D] leading-[150%]">
             <strong className="text-base font-semibold text-[#1E1E1E] leading-[150%]">
               Joined Date :
