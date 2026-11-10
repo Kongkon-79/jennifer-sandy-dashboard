@@ -5,7 +5,6 @@ import {
   Settings,
   RefreshCw,
   MessageSquare,
-  FileText,
   MessageSquareText,
   Users,
 } from 'lucide-react'
@@ -50,11 +49,6 @@ const items = [
     title: 'Inquiries Management',
     url: '/inquiries-management',
     icon: MessageSquare,
-  },
-  {
-    title: 'Blog Management',
-    url: '/blog-management',
-    icon: FileText,
   },
   {
     title: 'Contact Management',
@@ -120,7 +114,7 @@ export function DashboardSidebar() {
                           <SidebarMenuButton
                             className={`h-[46px] rounded-[6px] text-[15px] transition-all duration-200 ${
                               isActive
-                                ? 'bg-[#1273EA] hover:bg-[#1273EA] text-white hover:text-white font-semibold'
+                                ? 'bg-[#6F7470] hover:bg-[#5E625F] text-white hover:text-white font-semibold'
                                 : 'bg-transparent text-[#C5C7CA] hover:bg-white/10 hover:text-white font-medium'
                             }`}
                             asChild

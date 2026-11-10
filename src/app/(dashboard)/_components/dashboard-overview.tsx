@@ -1,5 +1,5 @@
 "use client";
-import { Building2, List, MessageSquare, FileText } from "lucide-react";
+import { Building2, List, MessageSquare } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import DashboardOverviewSkeleton from "./dashboard-overview-skeleton";
 import ErrorContainer from "@/components/shared/ErrorContainer/ErrorContainer";
@@ -60,7 +60,7 @@ export function DashboardOverview() {
     );
   } else {
     content = (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
         <div className="md:col-span-1 h-[128px] flex items-center justify-between bg-white border border-[#E6E7E6] shadow-[0px_4px_6px_0px_rgba(0,0,0,0.1)]  px-4 rounded-[10px]">
           <div>
             <p className="text-base md:text-lg leading-[150%] font-medium text-[#8E938F]">
@@ -72,7 +72,7 @@ export function DashboardOverview() {
           </div>
           <div>
             <span className="flex items-center justify-center bg-[#DCE8F3] p-3 rounded-[8px]">
-              <Building2 className="w-6 h-6 text-[#1273EA]" />
+              <Building2 className="w-6 h-6 text-[#6F7470]" />
             </span>
           </div>
         </div>
@@ -88,7 +88,7 @@ export function DashboardOverview() {
           </div>
           <div>
             <span className="flex items-center justify-center bg-[#DCE8F3] p-3 rounded-[8px]">
-              <List className="w-6 h-6 text-[#1273EA]" />
+              <List className="w-6 h-6 text-[#6F7470]" />
             </span>
           </div>
         </div>
@@ -104,26 +104,11 @@ export function DashboardOverview() {
           </div>
           <div>
             <span className="flex items-center justify-center bg-[#DCE8F3] p-3 rounded-[8px]">
-              <MessageSquare className="w-6 h-6 text-[#1273EA]" />
+              <MessageSquare className="w-6 h-6 text-[#6F7470]" />
             </span>
           </div>
         </div>
 
-        <div className="md:col-span-1 h-[128px] flex items-center justify-between bg-white border border-[#E6E7E6] shadow-[0px_4px_6px_0px_rgba(0,0,0,0.1)]  px-4 rounded-[10px]">
-          <div>
-            <p className="text-base md:text-lg leading-[150%] font-medium text-[#8E938F]">
-              Blog Articles
-            </p>
-            <p className="text-2xl md:text-[28px] lg:text-[32px] leading-[150%] text-primary font-bold pt-2">
-              {data?.data?.blogpost || 0}
-            </p>
-          </div>
-          <div>
-            <span className="flex items-center justify-center bg-[#DCE8F3] p-3 rounded-[8px]">
-              <FileText className="w-6 h-6 text-[#1273EA]" />
-            </span>
-          </div>
-        </div>
       </div>
     );
   }
