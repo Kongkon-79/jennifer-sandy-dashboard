@@ -1,230 +1,28 @@
-"use client";
-import React, { useState } from "react";
+'use client'
+import { useState } from 'react'
+import { useMutation,useQuery,useQueryClient } from '@tanstack/react-query'
+import { useSession } from 'next-auth/react'
+import { Eye,Mail,Phone,Trash2 } from 'lucide-react'
+import { toast } from 'sonner'
+import DeleteModal from '@/components/modals/delete-modal'
+import ClaudePagination from '@/components/ui/claude-pagination'
+import TableSkeletonWrapper from '@/components/shared/TableSkeletonWrapper/TableSkeletonWrapper'
+import ErrorContainer from '@/components/shared/ErrorContainer/ErrorContainer'
+import NotFound from '@/components/shared/NotFound/NotFound'
+import ContactManagementView from './contact-management-view'
+import type { ContactApiResponse,ContactItem } from './contact-data-type'
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import DeleteModal from "@/components/modals/delete-modal";
-import ClaudePagination from "@/components/ui/claude-pagination";
-import { Trash, Eye } from "lucide-react";
-import ContactManagementView from "./contact-management-view";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ContactApiResponse, ContactItem } from "./contact-data-type";
-import { useSession } from "next-auth/react";
-import TableSkeletonWrapper from "@/components/shared/TableSkeletonWrapper/TableSkeletonWrapper";
-import ErrorContainer from "@/components/shared/ErrorContainer/ErrorContainer";
-import NotFound from "@/components/shared/NotFound/NotFound";
-import { toast } from "sonner";
-
-const ContactManagementContainer = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [selectViewContact, setSelectViewContact] = useState(false);
-  const session = useSession();
-  const token = (session?.data?.user as { accessToken: string })?.accessToken;
-  const [selectedContact, setSelectedContact] = useState<ContactItem | null>(null);
-  const [selectedContactId, setSelectedContactId] = useState("");
-  const queryClient = useQueryClient();
-
-
-
-  const { data, isLoading, error, isError } = useQuery<ContactApiResponse>({
-    queryKey: ["contact-management", currentPage],
-    queryFn: async () => {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/contact?page=${currentPage}&limit=8`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
-      return res.json()
-    },
-    enabled: !!token
-  })
-
-  const totalPages = data?.meta ? Math.ceil(data.meta.total / data.meta.limit) : 0;
-
-
-
- let content;
-
-
-  if (isLoading) {
-    content = (
-      <div>
-        <TableSkeletonWrapper count={5} />
-      </div>
-    );
-  } else if (isError) {
-    content = (
-      <div>
-        <ErrorContainer message={error?.message || "Something went wrong"} />
-      </div>
-    );
-  } else if (
-    data &&
-    data?.data &&
-    data?.data?.length === 0
-  ) {
-    content = (
-      <div>
-        <NotFound message="Oops! No data available. Modify your filters or check your internet connection." />
-      </div>
-    );
-  }
-  else if (data && data?.data && data?.data?.length > 0){
-    content = (
-        <Table className="">
-          <TableHeader className="bg-[#E6F2FD] rounded-t-[12px]">
-            <TableRow className="">
-              <TableHead className="text-sm font-normal leading-[150%] text-[#343A40] py-4 pl-6">
-                Email Address
-              </TableHead>
-              <TableHead className="text-sm font-normal leading-[150%] text-[#343A40] text-center py-4 ">
-                Name
-              </TableHead>
-              <TableHead className="text-sm font-normal leading-[150%] text-[#343A40] text-center py-4 ">
-                Phone Number
-              </TableHead>
-              <TableHead className="text-sm font-normal leading-[150%] text-[#343A40] text-center py-4 ">
-                Message
-              </TableHead>
-              <TableHead className="text-sm font-normal leading-[150%] text-[#343A40] text-center py-4">
-                Action
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody className="border-b border-x border-[#E6E7E6] rounded-b-[12px]">
-            {data?.data?.map((item, index) => {
-              return (
-                <TableRow key={index} className="">
-                  <TableCell className="text-base font-medium text-[#68706A] leading-[150%] pl-6 py-4">
-                    {item?.email ? item?.email : "N/A"}
-                  </TableCell>
-                  <TableCell className="text-base font-normal text-[#68706A] leading-[150%] text-center py-4">
-                    {item?.fullName ? item?.fullName : "N/A"}
-                  </TableCell>
-                  <TableCell className="text-base font-normal text-[#68706A] leading-[150%] text-center py-4">
-                    {item?.phoneNumber ? item?.phoneNumber : "N/A"}
-                  </TableCell>
-                  <TableCell className="text-base font-normal text-[#68706A] leading-[150%] text-center py-4">
-                   <p className="truncate"> {item?.message ? item?.message : "N/A"}</p>
-                  </TableCell>
-                  <TableCell className="h-full flex items-center justify-center gap-6 py-4">
-                    <button
-                      onClick={() => {
-                        setSelectViewContact(true);
-                        setSelectedContact(item);
-                      }}
-                      className="cursor-pointer mt-2"
-                    >
-                      <Eye className="h-6 w-6 text-primary" />
-                    </button>
-                    <button
-                      onClick={() => {
-                        setDeleteModalOpen(true);
-                        setSelectedContactId(item?._id)
-                      }}
-                      className="cursor-pointer mt-2"
-                    >
-                      <Trash className="h-6 w-6 text-red-500" />
-                    </button>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-    )
-  }
-
-    // delete contact api
-  const { mutate } = useMutation({
-    mutationKey: ["delete-contact"],
-    mutationFn: async (id: string) => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/contact/${id}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      return res.json();
-    },
-    onSuccess: (data) => {
-      if (!data?.success) {
-        toast.error(data?.message || "Something went wrong");
-        return;
-      }
-      toast.success(data?.message || "Contact deleted successfully");
-      queryClient.invalidateQueries({ queryKey: ["contact-management"] });
-    },
-  });
-
-  const handleDelete = () => {
-    if (selectedContactId) {
-      mutate(selectedContactId);
-    }
-    setDeleteModalOpen(false);
-  };
-  return (
-    <div>
-      {/* table container */}
-      <div className="p-6 space-y-6">
-
-        {/* table  */}
-      <div>{content}</div>
-
-        {/* pagination  */}
-        {
-          totalPages > 1 && (
-            <div className="w-full flex items-center justify-between py-6">
-              <p className="text-base font-normal text-[#68706A] leading-[150%]">
-                Showing {currentPage} to 8 of {data?.meta?.total} results
-              </p>
-              <div>
-                <ClaudePagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={(page) => setCurrentPage(page)}
-                />
-              </div>
-            </div>
-          )
-        }
-
-        {/* delete modal  */}
-        {deleteModalOpen && (
-          <DeleteModal
-            isOpen={deleteModalOpen}
-            onClose={() => setDeleteModalOpen(false)}
-            onConfirm={handleDelete}
-            title="Are You Sure?"
-            desc="Are you sure you want to delete this Contact?"
-          />
-        )}
-
-        {/* contact view modal  */}
-        <div>
-          {selectViewContact && (
-            <ContactManagementView
-              open={selectViewContact}
-              onOpenChange={(open: boolean) => setSelectViewContact(open)}
-              contactData={selectedContact}
-            />
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default ContactManagementContainer;
+const empty='Nicht angegeben'
+const ContactManagementContainer=()=>{const[currentPage,setCurrentPage]=useState(1);const[view,setView]=useState<ContactItem|null>(null);const[deleting,setDeleting]=useState<ContactItem|null>(null);const session=useSession();const token=(session.data?.user as{accessToken?:string}|undefined)?.accessToken;const queryClient=useQueryClient();
+const{data,isLoading,isError,error}=useQuery<ContactApiResponse>({queryKey:['contact-management',currentPage],enabled:!!token,queryFn:async()=>{const res=await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/contact?page=${currentPage}&limit=8`,{headers:{Authorization:`Bearer ${token}`}});const body=await res.json();if(!res.ok||!body?.success)throw new Error(body?.message||'Kontakte konnten nicht geladen werden.');return body}})
+const remove=useMutation({mutationFn:async(id:string)=>{const res=await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/contact/${id}`,{method:'DELETE',headers:{Authorization:`Bearer ${token}`}});const body=await res.json();if(!res.ok||!body?.success)throw new Error(body?.message||'Kontakt konnte nicht gelöscht werden.');return body},onSuccess:()=>{toast.success('Kontakt wurde gelöscht.');setDeleting(null);queryClient.invalidateQueries({queryKey:['contact-management']})},onError:(e:Error)=>toast.error(e.message)})
+const items=data?.data||[];const totalPages=data?.meta?Math.ceil(data.meta.total/data.meta.limit):0
+if(isLoading)return <div className="p-4 sm:p-6"><TableSkeletonWrapper count={6}/></div>
+if(isError)return <div className="p-4 sm:p-6"><ErrorContainer message={error?.message||'Kontakte konnten nicht geladen werden.'}/></div>
+if(!items.length)return <div className="p-4 sm:p-6"><NotFound message="Es liegen noch keine Kontaktanfragen vor."/></div>
+return <div className="space-y-5 p-4 sm:p-6">
+<div className="hidden overflow-hidden rounded-xl border border-[#E2E5E3] bg-white shadow-sm lg:block"><table className="w-full table-fixed"><colgroup><col className="w-[23%]"/><col className="w-[18%]"/><col className="w-[16%]"/><col/><col className="w-[112px]"/></colgroup><thead className="bg-[#F0F2F0]"><tr className="text-left text-xs font-semibold uppercase tracking-wide text-[#5F6661]"><th className="px-5 py-4">E-Mail</th><th className="px-4 py-4">Name</th><th className="px-4 py-4">Telefon</th><th className="px-4 py-4">Nachricht</th><th className="px-4 py-4 text-center">Aktionen</th></tr></thead><tbody className="divide-y divide-[#E8EAE8]">{items.map(item=><tr key={item._id} className="transition-colors hover:bg-[#FAFBFA]"><td className="px-5 py-4"><a href={`mailto:${item.email}`} className="block truncate text-sm font-medium text-[#333834] hover:underline" title={item.email}>{item.email||empty}</a></td><td className="px-4 py-4"><p className="truncate text-sm text-[#4E5550]" title={item.fullName}>{item.fullName||empty}</p></td><td className="px-4 py-4"><p className="truncate text-sm text-[#4E5550]" title={item.phoneNumber}>{item.phoneNumber||empty}</p></td><td className="px-4 py-4"><p className="line-clamp-2 break-words text-sm leading-5 text-[#68706A]" title={item.message}>{item.message||empty}</p></td><td className="px-4 py-4"><div className="flex justify-center gap-2"><button onClick={()=>setView(item)} aria-label="Kontakt ansehen" title="Ansehen" className="rounded-lg border border-[#DDE1DE] p-2 text-[#6F7470] hover:bg-[#EEF0EE]"><Eye className="h-4 w-4"/></button><button onClick={()=>setDeleting(item)} aria-label="Kontakt löschen" title="Löschen" className="rounded-lg border border-red-100 p-2 text-red-500 hover:bg-red-50"><Trash2 className="h-4 w-4"/></button></div></td></tr>)}</tbody></table></div>
+<div className="grid gap-4 lg:hidden">{items.map(item=><article key={item._id} className="rounded-xl border border-[#E2E5E3] bg-white p-4 shadow-sm"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><h2 className="truncate font-semibold text-[#292E2A]">{item.fullName||empty}</h2><p className="mt-1 text-xs text-[#7A817C]">{new Date(item.createdAt).toLocaleDateString('de-DE')}</p></div><div className="flex shrink-0 gap-2"><button onClick={()=>setView(item)} aria-label="Kontakt ansehen" className="rounded-lg bg-[#EEF0EE] p-2 text-[#6F7470]"><Eye className="h-4 w-4"/></button><button onClick={()=>setDeleting(item)} aria-label="Kontakt löschen" className="rounded-lg bg-red-50 p-2 text-red-500"><Trash2 className="h-4 w-4"/></button></div></div><div className="mt-4 space-y-2 text-sm text-[#5F6661]"><a href={`mailto:${item.email}`} className="flex min-w-0 items-center gap-2 hover:underline"><Mail className="h-4 w-4 shrink-0"/><span className="truncate">{item.email||empty}</span></a><p className="flex items-center gap-2"><Phone className="h-4 w-4 shrink-0"/><span>{item.phoneNumber||empty}</span></p></div><p className="mt-4 line-clamp-3 break-words rounded-lg bg-[#F7F8F7] p-3 text-sm leading-6 text-[#59605B]">{item.message||empty}</p></article>)}</div>
+{totalPages>1&&<div className="flex flex-col items-center justify-between gap-4 sm:flex-row"><p className="text-sm text-[#68706A]">Seite {currentPage} von {totalPages} · {data?.meta.total} Anfragen</p><ClaudePagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage}/></div>}
+<ContactManagementView open={!!view} onOpenChange={open=>!open&&setView(null)} contactData={view}/>{deleting&&<DeleteModal isOpen onClose={()=>setDeleting(null)} onConfirm={()=>remove.mutate(deleting._id)} title="Kontakt löschen?" desc="Diese Kontaktanfrage wird dauerhaft gelöscht."/>}</div>}
+export default ContactManagementContainer

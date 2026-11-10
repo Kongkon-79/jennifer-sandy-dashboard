@@ -1,40 +1,6 @@
-import React from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { ContactItem } from "./contact-data-type";
-
-const ContactManagementView = ({
-  open,
-  onOpenChange,
-  contactData,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  contactData: ContactItem | null;
-}) => {
-  if (!contactData) return null;
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="p-6 space-y-4 bg-white !rounded-[12px]">
-
-        <div className="space-y-4">
-          <p className="text-base font-normal text-[#6C757D)] leading-[150%]">
-            <strong className="text-base font-semibold text-[#1E1E1E] leading-[150%]">Name :</strong> <br/> {contactData?.fullName}
-          </p>
-          <p className="text-base font-normal text-[#6C757D)] leading-[150%]">
-            <strong className="text-base font-semibold text-[#1E1E1E] leading-[150%]">Email :</strong> <br/> {contactData?.email}
-          </p>
-          <p className="text-base font-normal text-[#6C757D)] leading-[150%]">
-            <strong className="text-base font-semibold text-[#1E1E1E] leading-[150%]">Phone Number :</strong> <br/> {contactData?.phoneNumber}
-          </p>
-          <p className="text-base font-normal text-[#6C757D)] leading-[150%]">
-            <strong className="text-base font-semibold text-[#1E1E1E] leading-[150%]">Messages :</strong> <br/> {contactData?.message}
-          </p>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
-export default ContactManagementView;
-
+import { CalendarDays,Mail,MessageSquare,Phone,UserRound } from 'lucide-react'
+import { Dialog,DialogContent } from '@/components/ui/dialog'
+import type { ContactItem } from './contact-data-type'
+const empty='Nicht angegeben'
+export default function ContactManagementView({open,onOpenChange,contactData}:{open:boolean;onOpenChange:(open:boolean)=>void;contactData:ContactItem|null}){if(!contactData)return null;const replySubject=encodeURIComponent('Ihre Anfrage bei 0211wohnen');return <Dialog open={open} onOpenChange={onOpenChange}><DialogContent className="max-h-[90vh] w-[calc(100vw-2rem)] max-w-2xl overflow-y-auto rounded-2xl bg-white p-0"><header className="border-b border-[#E7E9E7] px-5 py-5 sm:px-7"><p className="text-xs font-semibold uppercase tracking-[.14em] text-[#6F7470]">Kontaktanfrage</p><h2 className="mt-1 text-xl font-semibold text-[#252A26] sm:text-2xl">Anfragedetails</h2></header><div className="space-y-6 px-5 py-6 sm:px-7"><div className="grid gap-3 sm:grid-cols-2"><Info icon={UserRound} label="Name" value={contactData.fullName||empty}/><Info icon={CalendarDays} label="Eingegangen" value={new Date(contactData.createdAt).toLocaleString('de-DE',{dateStyle:'medium',timeStyle:'short'})}/><Info icon={Mail} label="E-Mail" value={contactData.email||empty} href={contactData.email?`mailto:${contactData.email}`:undefined}/><Info icon={Phone} label="Telefon" value={contactData.phoneNumber||empty} href={contactData.phoneNumber?`tel:${contactData.phoneNumber}`:undefined}/></div><section><div className="mb-2 flex items-center gap-2 text-sm font-semibold text-[#3E453F]"><MessageSquare className="h-4 w-4 text-[#6F7470]"/>Nachricht</div><div className="whitespace-pre-wrap break-words rounded-xl border border-[#E3E6E3] bg-[#F7F8F7] p-4 text-sm leading-7 text-[#555D57]">{contactData.message||empty}</div></section><div className="flex flex-col-reverse gap-3 border-t border-[#E7E9E7] pt-5 sm:flex-row sm:justify-end"><button onClick={()=>onOpenChange(false)} className="rounded-lg border border-[#D9DDDA] px-5 py-2.5 text-sm font-semibold text-[#4E5550] hover:bg-[#F5F6F5]">Schließen</button><a href={`mailto:${contactData.email}?subject=${replySubject}`} className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#6F7470] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#5E625F]"><Mail className="h-4 w-4"/>Per E-Mail antworten</a></div></div></DialogContent></Dialog>}
+function Info({icon:Icon,label,value,href}:{icon:typeof Mail;label:string;value:string;href?:string}){const content=href?<a href={href} className="break-all text-sm font-medium text-[#333934] hover:underline">{value}</a>:<p className="break-words text-sm font-medium text-[#333934]">{value}</p>;return <div className="rounded-xl border border-[#E7E9E7] p-4"><div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#78807A]"><Icon className="h-4 w-4 text-[#6F7470]"/>{label}</div>{content}</div>}
